@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 # Generate keys into a temporary directory.
-echo "Generating TLS keys ..."
+echo "Generate TLS keys ..."
 
 mkdir -p "Certificates"
 chmod 0700 "Certificates"
 cd "Certificates"
 
-# Generate the CA cert and private key
+# Generate the CA cert and CA private key
 openssl req \
         -nodes \
         -new \
@@ -15,17 +15,17 @@ openssl req \
         -days 365 \
         -x509 \
         -subj "/C=FR/ST=Bezons/L=Bezons/O=Atos/OU= IT Department/CN=Webhook.CA" \
-        -keyout ca.key \
-        -out ca.cert 
+        -keyout "ca.key" \
+        -out "ca.cert" 
 
 
-# Generate a Certificate Signing Request (CSR) for the webhook server private key
+# Generate the private key and Certificate Signing Request (CSR) for the webhook server
 openssl req \
         -nodes \
         -newkey rsa:2048 \
-        -subj "/CN=WebhookServer.WebhookServerNameSpace.svc" \
-        -keyout webhookserver.key \
-        -out webhookserver.csr
+        -subj "/C=FR/ST=Bezons/L=Bezons/O=Atos/OU= IT Department/CN=WebhookServer.WebhookServerNameSpace.svc" \
+        -keyout "webhookservertls.key" \
+        -out "webhookservertls.csr"
 
 
 # Sign it with the private key of the CA.
@@ -34,7 +34,7 @@ openssl x509 \
         -CA ca.cert \
         -CAkey ca.key \
         -CAcreateserial \
-        -in webhookserver.csr \
-        -out webhookserver.cert
+        -in "webhookservertls.csr" \
+        -out "webhookservertls.cert"
 
-
+echo "Certificates ready!"
