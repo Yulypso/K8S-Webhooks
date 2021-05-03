@@ -55,13 +55,10 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false 
-        resources:
+        resources: 
           limits:
             memory: 512Mi
             cpu: "1"
-          requests:
-            memory: 256Mi
-            cpu: "500m"
         ports:
         - containerPort: 8443
           name: webhook-port

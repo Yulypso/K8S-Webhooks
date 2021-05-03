@@ -3,8 +3,8 @@
 echo "Reset Kubernetes Cluster..."
 
 echo "Deleting Kubernetes Objects..."
-kubectl delete -f "WebhookDeployments/webhookserver-deployment.yml" # delete webhook deployment
-#kubectl delete -f "WebhookDeployments/webhookconfiguration-deployment.yml"
+kubectl delete -f "WebhookDeployments/webhookserver-deployment.yml" # delete webhookserver deployment
+kubectl delete -f "WebhookDeployments/webhookconfiguration-deployment.yml" # delete webhookconfigurations
 kubectl delete -f "WebhookDeployments/namespaces.yml" # delete namespaces + secrets contained
 
 

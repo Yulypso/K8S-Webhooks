@@ -1,10 +1,13 @@
 apiVersion: admissionregistration.k8s.io/v1
-kind: MutatingWebhookConfiguration
+kind: MutatingWebhookConfiguration 
 metadata:
   name: mutatingwebhook
 webhooks:
   - name: webhookserver.webhookserver-ns.svc # service.namespace.svc
-    admissionReviewVersions: ["v1"]
+    admissionReviewVersions: ["v1", "v1beta1"]
+    namespaceSelector:
+      matchLabels:
+        kubewebhook: enabled # apply webhook to all objects deployed within the namespace labelled:  kubewebhook: enabled
     sideEffects: None
     matchPolicy: Equivalent # API Group or version independant 
     clientConfig:
@@ -24,10 +27,6 @@ webhooks:
     #  matchLabels:
     #    foo: bar
 
-    namespaceSelector:
-      matchLabels:
-        kubewebhook: enabled # apply webhook to all objects deployed within namespace labelled:  kubewebhook: enabled
-
     # not sure about : 
     #dryrun: true # to specify that there aren't any sideEffects and skip
     rules:
@@ -35,4 +34,4 @@ webhooks:
         apiGroups: ["*"]
         apiVersions: ["*"]
         resources: ["*"]
-        scope: "*"
+        scope: "Namespaced"
