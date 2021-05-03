@@ -1,0 +1,38 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mutatingwebhook
+webhooks:
+  - name: webhookserver.webhookserver-ns.svc # service.namespace.svc
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    matchPolicy: Equivalent # API Group or version independant 
+    clientConfig:
+      # 1) 
+      # url : "https://..." doesn't need caBundle verification 
+      # or 
+      # 2) 
+      service:
+        name: webhookserver 
+        namespace: webhookserver-ns
+        path: "/mutate" # default path: /
+        port: 443 # default port: 443
+      caBundle: ${CA_B64} # required for path method
+
+    # to select by objects labeled  
+    #objectSelector:
+    #  matchLabels:
+    #    foo: bar
+
+    namespaceSelector:
+      matchLabels:
+        kubewebhook: enabled # apply webhook to all objects deployed within namespace labelled:  kubewebhook: enabled
+
+    # not sure about : 
+    #dryrun: true # to specify that there aren't any sideEffects and skip
+    rules:
+      - operations: [ "CREATE" ] # apply webhook to all CREATE objects 
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["*"]
+        scope: "*"

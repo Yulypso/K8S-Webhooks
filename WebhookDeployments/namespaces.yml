@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: webhookserver-namespace
+  name: webhookserver-ns
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: admissionwebhook-namespace
+  name: admissionwebhook-ns
   labels:
     kubewebhook: enabled # for namespaceSelector within Webhook configuration

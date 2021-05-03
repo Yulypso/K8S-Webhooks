@@ -4,15 +4,15 @@ kind: ClusterRole
 metadata:
   name: ws-role
 rules:
-- apiGroups: [""]
+- apiGroups: ["*"]
   resources: ["namespaces", "deployments", "pods", "services"]
-  verbs: ["get"]
+  verbs: ["*"]
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: thierry
-  namespace: webhookserver-namespace
+  namespace: webhookserver-ns
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -25,13 +25,13 @@ roleRef:
 subjects: 
 - kind: ServiceAccount
   name: thierry
-  namespace: webhookserver-namespace
+  namespace: webhookserver-ns
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: webhookserver
-  #namespace: webhookserver-namespace
+  namespace: webhookserver-ns
   labels: 
     app: webhookserver
 spec:
@@ -47,10 +47,14 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1700
+        runAsGroup: 3000
+        fsGroup: 2000 
       containers:
       - name: webhookserver
         image: yulypso/node-app:v0.0.1
         imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false 
         resources:
           limits:
             memory: 512Mi
@@ -65,7 +69,7 @@ spec:
         - name: webhookserver-volume
           mountPath: /etc/secrets/tls
           readOnly: true
-      #serviceAccountName: thierry
+      serviceAccountName: thierry
       volumes:
       - name: webhookserver-volume
         secret:
@@ -75,50 +79,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: webhookserver
-  #namespace: webhookserver-namespace
+  namespace: webhookserver-ns
 spec:
   selector:
     app: webhookserver
   ports:
     - port: 443
       targetPort: webhook-port # 8443
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: MutatingWebhookConfiguration
-metadata:
-  name: mutatingwebhook
-webhooks:
-  - name: webhookserver.webhookserver-namespace.svc # service.namespace.svc
-    admissionReviewVersions: ["v1"]
-    sideEffects: None
-    matchPolicy: Equivalent # API Group or version independant 
-    clientConfig:
-      # 1) 
-      # url : "https://..." doesn't need caBundle verification 
-      # or 
-      # 2) 
-      service:
-        name: webhookserver 
-        namespace: default #webhookserver-namespace
-        path: "/mutate" # default path: /
-        port: 443 # default port: 443
-      caBundle: ${CA_B64} # required for path method
-
-    # to select by objects labeled  
-    #objectSelector:
-    #  matchLabels:
-    #    foo: bar
-
-    namespaceSelector:
-      matchLabels:
-        kubewebhook: enabled # apply webhook to all objects deployed within namespace labelled:  kubewebhook: enabled
-
-    # not sure about : 
-    #dryrun: true # to specify that there aren't any sideEffects and skip
-    rules:
-      - operations: [ "CREATE" ] # apply webhook to all CREATE objects 
-        apiGroups: ["*"]
-        apiVersions: ["*"]
-        resources: ["*"]
-        scope: "*"
 ---
