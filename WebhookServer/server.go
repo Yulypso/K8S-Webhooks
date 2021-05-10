@@ -54,7 +54,3 @@ func postWebhook(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Got request, response: %s\n", string(out))
 	fmt.Fprintln(w, string(out))
 }
-
-func testa() {
-	fmt.Println("test")
-}

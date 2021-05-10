@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	//config := Config{}
+	/* Local Server running*/
 	//TlsCertPath := "../Certificates/webhookservertls.cert"
 	//TlsKeyPath := "../Certificates/webhookservertls.key"
 
@@ -20,12 +20,11 @@ func main() {
 		fmt.Println("Error:", err)
 	}
 
-	//time.Sleep(9999999 * time.Second)
-
 	go func() {
 		handler := http.NewServeMux()
 
 		handler.HandleFunc("/test", func(rw http.ResponseWriter, r *http.Request) {
+			// kubectl exec -it -n webhookserver-ns $(kubectl get pods --no-headers -o custom-columns=":metadata.name" -n webhookserver-ns) -- wget -q -O- "localhost:8080/test"
 			fmt.Fprintf(rw, "test\n")
 		})
 		fmt.Printf("Starting localhost http server on :8080 with test endpoint\n")
