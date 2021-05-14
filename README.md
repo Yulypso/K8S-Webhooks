@@ -35,3 +35,13 @@ $ /bin/bash generate-K8S-objects.sh
 # Reset the workspace, clearning all created objects. 
 $ /bin/bash reset.sh
 ```
+
+## Certificates
+
+```bash
+# verify CSR content
+$ openssl req -text -noout -verify -in Certificates/webhookservertls.csr
+
+# verify CERT content
+$ openssl x509 -text -noout -in Certificates/webhookservertls.cert
+```

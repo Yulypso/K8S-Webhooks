@@ -3,7 +3,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: validatingwebhook
 webhooks:
-  - name: pod-validation.webhookserver-ns.svc # service.namespace.svc
+  - name: webhookserver.webhookserver-ns.svc # service.namespace.svc
     admissionReviewVersions: ["v1", "v1beta1"]
     namespaceSelector:
       matchLabels:

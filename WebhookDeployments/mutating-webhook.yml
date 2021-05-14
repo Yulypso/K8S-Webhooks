@@ -18,7 +18,7 @@ webhooks:
       service:
         name: webhookserver 
         namespace: webhookserver-ns
-        path: "/mutate" # default path: /
+        path: "/validate/pods" # default path: /
         port: 443 # default port: 443
       caBundle: ${CA_B64} # required for path method
 
@@ -33,5 +33,5 @@ webhooks:
       - operations: [ "CREATE" ] # apply webhook to all CREATE objects 
         apiGroups: ["*"]
         apiVersions: ["*"]
-        resources: ["*"]
+        resources: ["pods"]
         scope: "Namespaced"

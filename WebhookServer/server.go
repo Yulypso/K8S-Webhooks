@@ -1,14 +1,14 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 func postWebhook(w http.ResponseWriter, r *http.Request) {
-	var request AdmissionReviewRequest
+	fmt.Println("post request received")
+	fmt.Fprintf(w, "post request received\n")
+	/*var request AdmissionReviewRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("JSON body in invalid format: %s\n", err.Error()), http.StatusBadRequest)
@@ -31,15 +31,10 @@ func postWebhook(w http.ResponseWriter, r *http.Request) {
 
 	// add label if we're creating a pod
 	if request.Request.Kind.Group == "" && request.Request.Kind.Version == "v1" && request.Request.Kind.Kind == "Pod" && request.Request.Operation == "CREATE" {
-		/*patch := `[{
+		patch := `[{
 			"op": "add",
 			"path": "/metadata/labels/myExtraLabel",
 			"value": "webhook-was-here"
-		}]`*/
-		patch := `[{
-			"op": "add", 
-			"path": "/spec/securityContext/runAsUser", 
-			"value": 1200
 		}]`
 		patchEnc := base64.StdEncoding.EncodeToString([]byte(patch))
 		response.Response.PatchType = "JSONPatch"
@@ -52,5 +47,5 @@ func postWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("Got request, response: %s\n", string(out))
-	fmt.Fprintln(w, string(out))
+	fmt.Fprintln(w, string(out))*/
 }

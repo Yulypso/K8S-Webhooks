@@ -6,19 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
-	/* Local Server running*/
-	//TlsCertPath := "../Certificates/webhookservertls.cert"
-	//TlsKeyPath := "../Certificates/webhookservertls.key"
-
 	TlsCertPath := "/etc/secrets/tls/tls.crt"
 	TlsKeyPath := "/etc/secrets/tls/tls.key"
-	serverTLSConf, err := certSetup(TlsCertPath, TlsKeyPath)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
 
 	go func() {
 		handler := http.NewServeMux()
@@ -28,45 +21,57 @@ func main() {
 			fmt.Fprintf(rw, "test\n")
 		})
 		fmt.Printf("Starting localhost http server on :8080 with test endpoint\n")
-		err = http.ListenAndServe("localhost:8080", handler)
-
-		if err != nil {
+		if err := http.ListenAndServe("localhost:8080", handler); err != nil {
 			log.Fatal(err)
 		}
 	}()
 
 	fmt.Printf("Starting TLS server on: 8443\n")
-	mux := http.NewServeMux()
-	mux.HandleFunc("/validate/pods", postWebhook)
+	//mux := http.NewServeMux()
+	//mux.HandleFunc("/validate/pods", postWebhook)
+	http.HandleFunc("/validate/pods", postWebhook)
 	server := &http.Server{
 		Addr:      ":8443",
-		TLSConfig: serverTLSConf,
-		Handler:   mux,
+		TLSConfig: certSetup(TlsCertPath, TlsKeyPath),
+		//Handler:      mux,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	if err := server.ListenAndServeTLS("", ""); err != nil {
-		fmt.Printf("Failed to listen and serve: %v", err)
+		log.Fatal(err)
 	}
 }
 
-func certSetup(certPath string, privKeyPath string) (serverTLSConf *tls.Config, err error) {
+func certSetup(certPath string, privKeyPath string) (serverTLSConf *tls.Config) {
 
 	cert, err := ioutil.ReadFile(certPath)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Fatal(err)
 	}
-	PrivKey, err := ioutil.ReadFile(privKeyPath)
+	privKey, err := ioutil.ReadFile(privKeyPath)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Fatal(err)
 	}
 
-	serverCert, err := tls.X509KeyPair(cert, PrivKey)
+	serverCert, err := tls.X509KeyPair(cert, privKey)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
-	serverTLSConf = &tls.Config{
+	/*serverCert, err := tls.LoadX509KeyPair(certPath, privKeyPath)
+	if err != nil {
+		log.Fatal(err)
+	}*/
+
+	//fmt.Println("--- Certificate ---")
+	//fmt.Println(string(serverCert.Certificate[0]))
+	//fmt.Println(string(cert))
+	//fmt.Println("--- Private Key ---")
+	//fmt.Println(string(privKey))
+	//fmt.Println(serverCert.PrivateKey)
+
+	return &tls.Config{
 		Certificates: []tls.Certificate{serverCert},
 	}
-	return
 }

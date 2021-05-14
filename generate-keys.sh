@@ -10,20 +10,22 @@ cd "Certificates"
 # Generate the CA cert and CA private key
 openssl req \
         -nodes \
+        -sha256 \
         -new \
         -newkey rsa:4096 \
-        -days 365 \
+        -days 3650 \
         -x509 \
-        -subj "/C=FR/ST=Bezons/L=Bezons/O=Atos/OU= IT Department/CN=Webhook.CA" \
-        -keyout "ca.key" \
-        -out "ca.cert" 
-
+        -subj "/C=FR/ST=Bezons/L=Bezons/O=Atos/OU=IT Department/CN=webhookserver.webhookserver-ns.svc" \
+        -keyout "ca-key.pem" \
+        -out "ca.pem" 
 
 # Generate the private key and Certificate Signing Request (CSR) for the webhook server
 openssl req \
+        -new \
         -nodes \
-        -newkey rsa:2048 \
-        -subj "/C=FR/ST=Bezons/L=Bezons/O=Atos/OU= IT Department/CN=WebhookServer.WebhookServerNameSpace.svc" \
+        -sha256 \
+        -subj "/CN=webhookserver.webhookserver-ns.svc" \
+        -config "../webhookserver.csr.cnf" \
         -keyout "webhookservertls.key" \
         -out "webhookservertls.csr"
 
@@ -31,10 +33,13 @@ openssl req \
 # Sign it with the private key of the CA.
 openssl x509 \
         -req \
-        -CA ca.cert \
-        -CAkey ca.key \
+        -sha256 \
+        -days 3650 \
+        -CA "ca.pem" \
+        -CAkey "ca-key.pem" \
         -CAcreateserial \
         -in "webhookservertls.csr" \
-        -out "webhookservertls.cert"
+        -out "webhookservertls.cert" \
+        -extfile "../webhookserver_v3.ext"
 
 echo "Certificates ready!"
