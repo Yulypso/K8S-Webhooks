@@ -15,6 +15,9 @@ $ git clone https://github.com/Yulypso/K8S-Webhooks.git
 $ cd K8S-Webhooks
 ```
 
+---
+
+<br/>
 
 ## Start Webhooks
 
@@ -22,19 +25,29 @@ $ cd K8S-Webhooks
 # generate CA certificate/private key 
 # generate certificate/private key signed by CA private key
 
-$ /bin/bash generate-keys.sh
+$ ./generate-keys.sh
 
 # generate Kubernetes objects for webhooks
 
-$ /bin/bash generate-K8S-objects.sh
+$ ./generate-K8S-objects.sh
 ```
 
 ## Reset
 
 ```bash
-# Reset the workspace, clearning all created objects. 
-$ /bin/bash reset.sh
+# Reset the workspace, clean K8S objects. 
+$ ./reset.sh
+
+# Clean certificates
+$ ./reset.sh certificates
+
+# Build and Push to Docker Hub (for development uses)
+$ ./reset.sh docker
 ```
+
+---
+
+<br/>
 
 ## Certificates
 

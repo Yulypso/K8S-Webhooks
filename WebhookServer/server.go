@@ -35,7 +35,7 @@ func postWebhook(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	// add label if we're creating a pod
+	// add patches if we're creating a pod
 	if request.Request.Kind.Group == "" && request.Request.Kind.Version == "v1" && request.Request.Kind.Kind == "Pod" && request.Request.Operation == "CREATE" {
 		patch, err := ioutil.ReadFile("./Patches/myExtralabel.conf")
 		if err != nil {

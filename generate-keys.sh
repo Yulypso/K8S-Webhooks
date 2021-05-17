@@ -15,7 +15,7 @@ openssl req \
         -newkey rsa:4096 \
         -days 3650 \
         -x509 \
-        -subj "/CN=10.96.0.10" \
+        -subj "/CN=10.96.0.1" \
         -keyout "ca-key.pem" \
         -out "ca.pem" 
 

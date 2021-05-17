@@ -8,7 +8,6 @@ kubectl delete -f "WebhookDeployments/mutating-webhook.yml" # delete webhookconf
 kubectl delete -f "WebhookDeployments/namespaces.yml" # delete namespaces + secrets contained
 kubectl delete -f "TestDeployments/pod-1.yml"
 
-
 shopt -s nocasematch # ignore case sensitive
 if [[ "$1" =~ ^certificate ]]; then
     echo "Deleting Certificates..."
@@ -18,9 +17,9 @@ fi
 
 if [[ "$1" =~ ^docker ]]; then
     cd webhookserver
-    echo "Docker build"
+    echo "Docker build..."
     docker build -t yulypso/webhookserver:v0.0.1 . 
-    echo "Docker push"
+    echo "Docker push..."
     docker push yulypso/webhookserver:v0.0.1  
 fi
 

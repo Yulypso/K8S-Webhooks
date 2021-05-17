@@ -22,9 +22,8 @@ DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster
 DNS.5 = kubernetes.default.svc.cluster.local
-IP.1 = 10.96.0.10 # <Master IP>
-IP.2 = 10.96.0.1 # <Master Cluster IP>
 DNS.6 = webhookserver.webhookserver-ns.svc
+IP.1 = 10.96.0.1 
 
 [ v3_ext ]
 authorityKeyIdentifier=keyid,issuer:always
