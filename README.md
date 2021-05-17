@@ -19,30 +19,55 @@ $ cd K8S-Webhooks
 
 <br/>
 
-## Start Webhooks
+## Start Webhooks 
+(Namespace: webhookserver-ns)
+
+> Generate CA certificate/CA private key 
+> Generate server certificate/server private key signed by CA private key
 
 ```bash
-# generate CA certificate/private key 
-# generate certificate/private key signed by CA private key
-
 $ ./generate-keys.sh
+```
 
-# generate Kubernetes objects for webhooks
-
+> Generate Kubernetes objects for webhooks within webhookserver-ns namespace
+```bash
 $ ./generate-K8S-objects.sh
 ```
 
+<br/>
+
+## Start test pod 
+(Namespace: admissionwebhook-ns)
+
+> Generate pod within admissionwebhook-ns namespace which calls the created webhook
+```bash
+$ kubectl apply -f ./TestDeployments/pod-1.yml
+```
+
+---
+
+<br/>
+
 ## Reset
 
+> Reset the workspace, clean K8S objects. 
 ```bash
-# Reset the workspace, clean K8S objects. 
 $ ./reset.sh
+```
 
-# Clean certificates
+> Clean certificates
+```bash
 $ ./reset.sh certificates
+```
 
-# Build and Push to Docker Hub (for development uses)
+> Build and Push to Docker Hub (for development uses)
+```bash
 $ ./reset.sh docker
+```
+
+> Both
+```bash
+$ ./reset certificates docker
 ```
 
 ---
@@ -51,10 +76,12 @@ $ ./reset.sh docker
 
 ## Certificates
 
+> Verify CSR content
 ```bash
-# verify CSR content
 $ openssl req -text -noout -verify -in Certificates/webhookservertls.csr
+```
 
-# verify CERT content
+> Verify CERT content
+```bash
 $ openssl x509 -text -noout -in Certificates/webhookservertls.cert
 ```
