@@ -1,24 +1,34 @@
-[req]
-default_bits            = 2048                  # RSA key size
-encrypt_key             = no                    # Protect private key
-default_md              = sha256                # MD to use
-utf8                    = yes                   # Input is UTF-8
-string_mask             = utf8only              # Emit UTF-8 strings
-prompt                  = yes                   # Prompt for DN
-distinguished_name      = server_dn             # DN template
-req_extensions          = server_reqext         # Desired extensions
+[ req ]
+default_bits = 2048
+prompt = no
+default_md = sha256
+req_extensions = req_ext
+distinguished_name = dn
 
-[server_dn]
-countryName             = "FR"
-countryName_max         = 2
-stateOrProvinceName     = "Bezons"
-localityName            = "Bezons"
-organizationName        = "Atos"
-organizationalUnitName  = "IT Department"
-commonName              = "webhookserver.webhookserver-ns.svc"
-commonName_max          = 64
+[ dn ]
+C = FR
+ST = Bezons
+L = Bezons
+O = Atos
+OU = IT
+CN = 10.96.0.10
 
-[server_reqext]
-keyUsage                = critical,digitalSignature,keyEncipherment
-extendedKeyUsage        = serverAuth,clientAuth
-subjectKeyIdentifier    = hash
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster
+DNS.5 = kubernetes.default.svc.cluster.local
+IP.1 = 10.96.0.10 # <Master IP>
+IP.2 = 10.96.0.1 # <Master Cluster IP>
+DNS.6 = webhookserver.webhookserver-ns.svc
+
+[ v3_ext ]
+authorityKeyIdentifier=keyid,issuer:always
+basicConstraints=CA:FALSE
+keyUsage=keyEncipherment,dataEncipherment
+extendedKeyUsage=serverAuth,clientAuth
+subjectAltName=@alt_names

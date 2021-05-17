@@ -15,7 +15,7 @@ openssl req \
         -newkey rsa:4096 \
         -days 3650 \
         -x509 \
-        -subj "/C=FR/ST=Bezons/L=Bezons/O=Atos/OU=IT Department/CN=webhookserver.webhookserver-ns.svc" \
+        -subj "/CN=10.96.0.10" \
         -keyout "ca-key.pem" \
         -out "ca.pem" 
 
@@ -24,7 +24,6 @@ openssl req \
         -new \
         -nodes \
         -sha256 \
-        -subj "/CN=webhookserver.webhookserver-ns.svc" \
         -config "../webhookserver.csr.cnf" \
         -keyout "webhookservertls.key" \
         -out "webhookservertls.csr"
@@ -40,6 +39,7 @@ openssl x509 \
         -CAcreateserial \
         -in "webhookservertls.csr" \
         -out "webhookservertls.cert" \
-        -extfile "../webhookserver_v3.ext"
+        -extensions v3_ext \
+        -extfile "../webhookserver.csr.cnf"
 
 echo "Certificates ready!"

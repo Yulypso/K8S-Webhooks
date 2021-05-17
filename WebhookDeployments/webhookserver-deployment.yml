@@ -4,8 +4,8 @@ kind: ClusterRole
 metadata:
   name: ws-role
 rules:
-- apiGroups: ["*"]
-  resources: ["namespaces", "deployments", "pods", "services"]
+- apiGroups: [""]
+  resources: ["*"]
   verbs: ["*"]
 ---
 apiVersion: v1
@@ -48,13 +48,13 @@ spec:
         runAsNonRoot: true
         runAsUser: 1700
         runAsGroup: 3000
-        fsGroup: 2000 
+        fsGroup: 2000
       containers:
       - name: webhookserver
         image: yulypso/webhookserver:v0.0.1
         imagePullPolicy: IfNotPresent
         securityContext:
-          allowPrivilegeEscalation: false 
+          allowPrivilegeEscalation: false
         resources: 
           limits:
             memory: 512Mi
