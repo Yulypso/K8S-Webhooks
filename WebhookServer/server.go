@@ -37,7 +37,7 @@ func postWebhook(w http.ResponseWriter, r *http.Request) {
 
 	// add patches if we're creating a pod
 	if request.Request.Kind.Group == "" && request.Request.Kind.Version == "v1" && request.Request.Kind.Kind == "Pod" && request.Request.Operation == "CREATE" {
-		patch, err := ioutil.ReadFile("./Patches/myExtralabel.conf")
+		patch, err := ioutil.ReadFile("./Patches/securityContext.conf")
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err)
 			http.Error(w, fmt.Sprintf("Read config file error: %s\n", err.Error()), http.StatusBadRequest)
