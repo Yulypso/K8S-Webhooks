@@ -18,6 +18,7 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	/*
 	 * Routers
 	 */
+	mux.HandleFunc("/mutate/pods", podMutation)
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
