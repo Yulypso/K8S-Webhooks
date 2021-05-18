@@ -1,12 +1,12 @@
 package main
 
 import (
-	"crypto/tls"
-	"log"
-	"net/http"
-	"time"
+	"K8S-Webhooks/WebhookServer/http"
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/yulypso/K8S-Webhooks/http"
 	log "k8s.io/klog/v2"
 )
 
@@ -16,28 +16,21 @@ func main() {
 	port := "8443"
 
 	log.Infof("Starting TLS server on port: %s", port)
-	mux := http.NewServeMux()
-	mux.HandleFunc("/validate/pods", postWebhook)
-	server := &http.Server{
-		Addr:         ":8443",
-		TLSConfig:    certSetup(tlsCertPath, tlsKeyPath),
-		Handler:      mux,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
+	server := http.NewServer(port, tlsCertPath, tlsKeyPath)
 
-	if err := server.ListenAndServeTLS("", ""); err != nil {
-		log.Fatal(err)
-	}
-}
+	go func() {
+		if err := server.ListenAndServeTLS("", ""); err != nil {
+			log.Errorf("Failed to listen and serve: %v", err)
+		}
+	}()
 
-func certSetup(certPath string, privKeyPath string) (serverTLSConf *tls.Config) {
-	serverCert, err := tls.LoadX509KeyPair(certPath, privKeyPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// listen to any shutdown signal
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	<-signalChan
 
-	return &tls.Config{
-		Certificates: []tls.Certificate{serverCert},
+	log.Infof("Shutdown...")
+	if err := server.Shutdown(context.Background()); err != nil {
+		log.Error(err)
 	}
 }

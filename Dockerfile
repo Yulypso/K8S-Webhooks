@@ -7,7 +7,7 @@ WORKDIR /go/src/webhookserver
 COPY . .
 RUN go mod download
 
-WORKDIR /go/src/webhookserver/WebhookServer
+WORKDIR /go/src/webhookserver/WebhookServer/cmd/server
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o webhookserver *.go
 
 #
@@ -23,5 +23,5 @@ WORKDIR /app
 COPY --from=go-builder /go/src/webhookserver .
 USER app
 
-WORKDIR /app/WebhookServer
+WORKDIR /app/WebhookServer/cmd/server
 CMD ["./webhookserver"]  
