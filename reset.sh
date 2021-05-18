@@ -16,11 +16,10 @@ if [[ "$1" =~ ^certificate ]]; then
 fi
 
 if [[ "$1" =~ ^docker ]]; then
-    cd webhookserver
     echo "Docker build..."
-    docker build -t yulypso/webhookserver:v0.0.1 . 
+    docker build -t yulypso/webhookserver:v0.0.2 . 
     echo "Docker push..."
-    docker push yulypso/webhookserver:v0.0.1  
+    docker push yulypso/webhookserver:v0.0.2
 fi
 
 echo "Clear!"

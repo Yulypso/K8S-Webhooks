@@ -1,0 +1,12 @@
+Certificates/
+Save/
+target/
+TestDeployments/
+WebhookDeployments/
+.gitignore
+.git
+generate-K8S-objects.sh
+generate-keys.sh
+reset.sh
+webhookserver.csr.cnf
+README.md
