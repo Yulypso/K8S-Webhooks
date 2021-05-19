@@ -8,6 +8,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+/* VALIDATE CREATE */
 func validateCreate() admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 		fmt.Println("Log: POD VALIDATING...")
@@ -41,3 +42,9 @@ func unvalidateRunAsRoot(pod *v1.Pod, message *string) bool {
 	}
 	return false
 }
+
+/* VALIDATE UPDATE */
+
+/* VALIDATE DELETE */
+
+/* VALIDATE CONNECT */

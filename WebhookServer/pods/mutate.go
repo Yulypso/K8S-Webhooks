@@ -8,6 +8,14 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+func annotateMutate(key string, value string, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+	fmt.Println("Log: Add /metadata/annotations...")
+	metadata := map[string]string{key: value}
+	operations = append(operations, admissioncontroller.AddPatchOperation("/metadata/annotations", metadata))
+	return operations
+}
+
+/* MUTATE CREATE */
 func mutateCreate() admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 		fmt.Println("Log: POD MUTATING...")
@@ -35,15 +43,20 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 func mutateRunAsRoot(pod *v1.Pod, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
 	if pod.Spec.SecurityContext.RunAsUser == nil { // Root user or uninitialized int64 type
 		fmt.Println("Log: Run as root detected, Mutating...")
+
 		patches := admissioncontroller.ParseConfig("securityContext.conf")
 		for path, value := range patches { // for each patch within the config file
 			operations = append(operations, admissioncontroller.AddPatchOperation(path, value))
 		}
 
-		// Add a simple annotation using `AddPatchOperation`
-		fmt.Println("Log: Add /metadata/annotations...")
-		metadata := map[string]string{"origin": "Mutation"}
-		operations = append(operations, admissioncontroller.AddPatchOperation("/metadata/annotations", metadata))
+		// Add annotation
+		operations = annotateMutate("mutate-CREATE", "mutateRunAsRoot", operations)
 	}
 	return operations
 }
+
+/* MUTATE UPDATE */
+
+/* MUTATE DELETE */
+
+/* MUTATE CONNECT */

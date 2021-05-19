@@ -87,3 +87,12 @@ $ openssl req -text -noout -verify -in Certificates/webhookservertls.csr
 ```bash
 $ openssl x509 -text -noout -in Certificates/webhookservertls.cert
 ```
+
+---
+
+<br/>
+
+## Documentations
+
+- [Admission control](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
+    > "Admission webhooks are HTTP callbacks that receive admission requests and do something with them. You can define two types of admission webhooks, validating admission webhook and mutating admission webhook. Mutating admission webhooks are invoked first, and can modify objects sent to the API server to enforce custom defaults. After all object modifications are complete, and after the incoming object is validated by the API server, validating admission webhooks are invoked and can reject requests to enforce custom policies."

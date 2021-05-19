@@ -1,1 +1,9 @@
 package deployments
+
+/* VALIDATE CREATE */
+
+/* VALIDATE UPDATE */
+
+/* VALIDATE DELETE */
+
+/* VALIDATE CONNECT */
