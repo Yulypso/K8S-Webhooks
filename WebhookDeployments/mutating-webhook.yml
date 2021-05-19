@@ -3,34 +3,22 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: mutatingwebhook
 webhooks:
-  - name: webhookserver.webhookserver-ns.svc # service.namespace.svc
+  - name: pod-mutation.webhookserver-ns.svc 
     admissionReviewVersions: ["v1", "v1beta1"]
     namespaceSelector:
       matchLabels:
-        kubewebhook: enabled # apply webhook to all objects deployed within the namespace labelled:  kubewebhook: enabled
+        kubewebhook: enabled 
     sideEffects: None
-    matchPolicy: Equivalent # API Group or version independant
+    matchPolicy: Equivalent
     clientConfig:
-      # 1) 
-      # url : "https://..." doesn't need caBundle verification
-      # or 
-      # 2) 
       service:
         name: webhookserver
         namespace: webhookserver-ns
-        path: "/mutate/pods" # default path: /
-        port: 443 # default port: 443
-      caBundle: ${CA_B64} # required for path method
-
-    # to select by objects labeled
-    #objectSelector:
-    #  matchLabels:
-    #    foo: bar
-
-    # not sure about :
-    #dryrun: true # to specify that there aren't any sideEffects and skip
+        path: "/mutate/pods" 
+        port: 443 
+      caBundle: ${CA_B64} 
     rules:
-      - operations: [ "CREATE" ] # apply webhook to all CREATE objects
+      - operations: [ "CREATE" ] 
         apiGroups: ["*"]
         apiVersions: ["*"]
         resources: ["pods"]

@@ -24,3 +24,9 @@ func NewMutationWebhook() admissioncontroller.Hook {
 		Create: mutateCreate(),
 	}
 }
+
+func NewValidationWebhook() admissioncontroller.Hook {
+	return admissioncontroller.Hook{
+		Create: validateCreate(),
+	}
+}

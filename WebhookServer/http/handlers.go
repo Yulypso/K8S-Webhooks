@@ -83,22 +83,24 @@ func (h *admissionHandler) serve(hook admissioncontroller.Hook) http.HandlerFunc
 				Kind:       "AdmissionReview",
 			},
 			Response: &admission.AdmissionResponse{
-				UID:       review.Request.UID,
-				Allowed:   result.Allowed,
-				Result:    &meta.Status{Message: result.Msg},
-				PatchType: &JSONPatch,
+				UID:     review.Request.UID,
+				Allowed: result.Allowed,
+				Result:  &meta.Status{Message: result.Msg},
 			},
 		}
 
+		/* Mutating Only */
 		if len(result.PatchOps) > 0 {
 			patchBytes, err := json.Marshal(result.PatchOps) // Get Patched operations
 			if err != nil {
 				klog.Error(err)
 				http.Error(w, fmt.Sprintf("Error: Could not marshal JSON patch: %v", err), http.StatusInternalServerError)
 			}
+			admissionResponse.Response.PatchType = &JSONPatch
 			admissionResponse.Response.Patch = patchBytes // Set Patched operations
 		}
 
+		/* JSON Marshal Response */
 		res, err := json.Marshal(admissionResponse)
 		if err != nil {
 			klog.Error(err)
