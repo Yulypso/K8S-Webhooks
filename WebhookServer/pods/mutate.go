@@ -5,17 +5,9 @@ import (
 	"fmt"
 
 	admission "k8s.io/api/admission/v1"
-	v1 "k8s.io/api/core/v1"
 )
 
-func annotateMutate(key string, value string, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
-	fmt.Println("Log: Add /metadata/annotations...")
-	metadata := map[string]string{key: value}
-	operations = append(operations, admissioncontroller.AddPatchOperation("/metadata/annotations", metadata))
-	return operations
-}
-
-/* MUTATE CREATE */
+/** MUTATE CREATE **/
 func mutateCreate() admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 		fmt.Println("Log: POD MUTATING...")
@@ -39,24 +31,31 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 	}
 }
 
-/* Mutate if Pod is run as root */
-func mutateRunAsRoot(pod *v1.Pod, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
-	if pod.Spec.SecurityContext.RunAsUser == nil { // Root user or uninitialized int64 type
-		fmt.Println("Log: Run as root detected, Mutating...")
+func mutateCreate2() admissioncontroller.AdmitFunc {
+	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
+		fmt.Println("Log: POD MUTATING...")
 
-		patches := admissioncontroller.ParseConfig("securityContext.conf")
-		for path, value := range patches { // for each patch within the config file
-			operations = append(operations, admissioncontroller.AddPatchOperation(path, value))
+		/* Parse requested pod */
+		pod, err := unmarshalPod(r.Object.Raw)
+		if err != nil {
+			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}
 
-		// Add annotation
-		operations = annotateMutate("mutate-CREATE", "mutateRunAsRoot", operations)
+		/* Mutate Operation list */
+		var operations []admissioncontroller.PatchOperation
+
+		/* Apply pod mutating operation conditions */
+		operations = mutateRunAsRoot(pod, operations)
+
+		return &admissioncontroller.Result{
+			Allowed:  true,
+			PatchOps: operations,
+		}, nil
 	}
-	return operations
 }
 
-/* MUTATE UPDATE */
+/** MUTATE UPDATE **/
 
-/* MUTATE DELETE */
+/** MUTATE DELETE **/
 
-/* MUTATE CONNECT */
+/** MUTATE CONNECT **/

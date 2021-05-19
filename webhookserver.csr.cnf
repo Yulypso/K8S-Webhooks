@@ -22,7 +22,6 @@ DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster
 DNS.5 = kubernetes.default.svc.cluster.local
-DNS.6 = pod-mutation.webhookserver-ns.svc
 IP.1 = 10.96.0.1 
 
 [ v3_ext ]

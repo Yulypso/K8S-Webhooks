@@ -1,7 +1,7 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: mutatingwebhook
+  name: a-mutatingwebhook
 webhooks:
   - name: pod-mutation.webhookserver-ns.svc 
     admissionReviewVersions: ["v1", "v1beta1"]
@@ -14,11 +14,37 @@ webhooks:
       service:
         name: webhookserver
         namespace: webhookserver-ns
-        path: "/mutate/pods" 
+        path: "/mutate/pods/a" 
         port: 443 
       caBundle: ${CA_B64} 
     rules:
-      - operations: [ "CREATE" ] 
+      - operations: ["CREATE"] 
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["pods"]
+        scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: b-mutatingwebhook
+webhooks:
+  - name: pod-mutation.webhookserver-ns.svc 
+    admissionReviewVersions: ["v1", "v1beta1"]
+    namespaceSelector:
+      matchLabels:
+        kubewebhook: enabled 
+    sideEffects: None
+    matchPolicy: Equivalent
+    clientConfig:
+      service:
+        name: webhookserver
+        namespace: webhookserver-ns
+        path: "/mutate/pods/b" 
+        port: 443 
+      caBundle: ${CA_B64} 
+    rules:
+      - operations: ["CREATE"] 
         apiGroups: ["*"]
         apiVersions: ["*"]
         resources: ["pods"]

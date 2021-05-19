@@ -8,7 +8,7 @@
 
 <br/>
 
-## Second implementation
+## Third implementation (2 Mutating Webhooks)
 
 ## Setup
 
@@ -92,7 +92,13 @@ $ openssl x509 -text -noout -in Certificates/webhookservertls.cert
 
 <br/>
 
-## Documentations
+## Questions and Answers
 
+What happens if you have both a MutatingWebhook and a ValidatingWebhook, which is applied first during a deployment? 
 - [Admission control](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
     > "Admission webhooks are HTTP callbacks that receive admission requests and do something with them. You can define two types of admission webhooks, validating admission webhook and mutating admission webhook. Mutating admission webhooks are invoked first, and can modify objects sent to the API server to enforce custom defaults. After all object modifications are complete, and after the incoming object is validated by the API server, validating admission webhooks are invoked and can reject requests to enforce custom policies."
+
+What happens when you have two MutatingWebhooks, which of the two is run first? How is it going ?
+> The metadata.name field is used to define the order of application of MutatingWebhooks and ValidatingWebhooks. Within the prototype, a-mutatingwebhook is applied before b-mutatingwebhook 
+> 
+> Therefore, we can have in this order of execution, a MutatingWebhook [a] which can do [0-n] operations and have a second MutatingWebhook [b] which can also do [0-n] operations.

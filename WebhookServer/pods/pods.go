@@ -18,13 +18,20 @@ func unmarshalPod(object []byte) (*v1.Pod, error) {
 	return &pod, nil
 }
 
-/* Mutating Webhook for Pods */
+/* Mutating Webhooks for Pods */
 func NewMutationWebhook() admissioncontroller.Hook {
 	return admissioncontroller.Hook{
 		Create: mutateCreate(),
 	}
 }
 
+func NewMutationWebhook2() admissioncontroller.Hook {
+	return admissioncontroller.Hook{
+		Create: mutateCreate2(),
+	}
+}
+
+/* Validating Webhooks for Pods */
 func NewValidationWebhook() admissioncontroller.Hook {
 	return admissioncontroller.Hook{
 		Create: validateCreate(),

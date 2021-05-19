@@ -1,4 +1,3 @@
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -83,4 +82,3 @@ spec:
   ports:
     - port: 443
       targetPort: webhook-port # 8443
----
