@@ -15,17 +15,9 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 
 		// Parse pod
 		pod, err := unmarshalPod(r.Object.Raw)
-		fmt.Println("Log: DONE UNMARSHAL POD")
 		if err != nil {
-			fmt.Println("Error: FAILED UNMARSHAL POD")
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}
-		fmt.Println("Log: CONDITIONS")
-		fmt.Println("IS WORKING ?")
-		fmt.Println(pod.GetLabels())
-		fmt.Println("IS BUGGING ?")
-		fmt.Println(pod.Spec.SecurityContext.RunAsUser)
-		fmt.Println("HEHEHEEH")
 
 		// Mutate if Pod is run as root
 		if pod.Spec.SecurityContext.RunAsUser == nil { // Root user or uninitialized int64 type
@@ -36,12 +28,11 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 			}
 
 			// Add a simple annotation using `AddPatchOperation`
-			fmt.Println("Log: Add annotations...")
+			fmt.Println("Log: Add /metadata/annotations...")
 			metadata := map[string]string{"origin": "Mutation"}
 			operations = append(operations, admissioncontroller.AddPatchOperation("/metadata/annotations", metadata))
 		}
 
-		fmt.Println("Log: DONE MUTATING...")
 		return &admissioncontroller.Result{
 			Allowed:  true,
 			PatchOps: operations,

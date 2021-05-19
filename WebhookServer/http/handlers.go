@@ -63,13 +63,9 @@ func (h *admissionHandler) serve(hook admissioncontroller.Hook) http.HandlerFunc
 		fmt.Println("Log: Post request received")
 
 		checkIsPostMethod(w, r)
-		fmt.Println("Log: 1")
 		checkContentType(w, r)
-		fmt.Println("Log: 2")
 		body := getBodyRequest(w, r)
-		fmt.Println("Log: 3")
 		review := getReview(h, body, w)
-		fmt.Println("Log: 4")
 
 		/* Mutating/Validating Webhook execution */
 		result, err := hook.Execute(review.Request)
@@ -78,31 +74,38 @@ func (h *admissionHandler) serve(hook admissioncontroller.Hook) http.HandlerFunc
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		fmt.Println("Log: 5")
+
+		/* Response building */
+		JSONPatch := admission.PatchTypeJSONPatch
 		admissionResponse := admission.AdmissionReview{
+			TypeMeta: meta.TypeMeta{
+				APIVersion: "admission.k8s.io/v1",
+				Kind:       "AdmissionReview",
+			},
 			Response: &admission.AdmissionResponse{
-				UID:     review.Request.UID,
-				Allowed: result.Allowed,
-				Result:  &meta.Status{Message: result.Msg},
+				UID:       review.Request.UID,
+				Allowed:   result.Allowed,
+				Result:    &meta.Status{Message: result.Msg},
+				PatchType: &JSONPatch,
 			},
 		}
-		fmt.Println("Log: 6")
+
 		if len(result.PatchOps) > 0 {
-			patchBytes, err := json.Marshal(result.PatchOps)
+			patchBytes, err := json.Marshal(result.PatchOps) // Get Patched operations
 			if err != nil {
 				klog.Error(err)
 				http.Error(w, fmt.Sprintf("Error: Could not marshal JSON patch: %v", err), http.StatusInternalServerError)
 			}
-			admissionResponse.Response.Patch = patchBytes
+			admissionResponse.Response.Patch = patchBytes // Set Patched operations
 		}
-		fmt.Println("Log: 7")
+
 		res, err := json.Marshal(admissionResponse)
 		if err != nil {
 			klog.Error(err)
 			http.Error(w, fmt.Sprintf("Error: Could not marshal response: %v", err), http.StatusInternalServerError)
 			return
 		}
-		fmt.Println("Log: 8")
+
 		klog.Infof("Webhook [%s - %s] - Allowed: %t", r.URL.Path, review.Request.Operation, result.Allowed)
 		w.WriteHeader(http.StatusOK)
 		w.Write(res)
