@@ -1,6 +1,7 @@
 package http
 
 import (
+	"K8S-Webhooks/WebhookServer/pods"
 	"crypto/tls"
 	"fmt"
 	"log"
@@ -10,15 +11,17 @@ import (
 
 func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server {
 	mux := http.NewServeMux()
+	admissionHandler := newAdmissionHandler()
 
 	/*
 	 * Webhooks
 	 */
+	podMutation := pods.NewMutationWebhook()
 
 	/*
 	 * Routers
 	 */
-	mux.HandleFunc("/mutate/pods", podMutation)
+	mux.HandleFunc("/mutate/pods", admissionHandler.serve(podMutation))
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
