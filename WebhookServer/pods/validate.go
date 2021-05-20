@@ -21,8 +21,10 @@ func validateCreate() admissioncontroller.AdmitFunc {
 		/* Result Message */
 		var message string
 
+		//TODO: verify if configuration is Guaranteed by verifications.conf
+
 		/* Apply pod validating operation conditions */
-		if forbidden := unvalidateRunAsRoot(pod, &message); forbidden {
+		if authorized := validate(pod, &message); !authorized {
 			return &admissioncontroller.Result{Msg: message}, nil
 		}
 

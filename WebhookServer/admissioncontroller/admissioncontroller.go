@@ -53,11 +53,8 @@ type PatchOperation struct {
 }
 
 const (
-	addOperation     = "add"
-	removeOperation  = "remove"
-	replaceOperation = "replace"
-	copyOperation    = "copy"
-	moveOperation    = "move"
+	addOperation    = "add"
+	removeOperation = "remove"
 )
 
 // AddPatchOperation returns an add JSON patch operation.
@@ -66,6 +63,14 @@ func AddPatchOperation(path string, value interface{}) PatchOperation {
 		Op:    addOperation,
 		Path:  path,
 		Value: value,
+	}
+}
+
+// RemovePatchOperation returns a remove JSON patch operation.
+func RemovePatchOperation(path string) PatchOperation {
+	return PatchOperation{
+		Op:   removeOperation,
+		Path: path,
 	}
 }
 

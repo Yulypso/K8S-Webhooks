@@ -25,12 +25,6 @@ func NewMutationWebhook() admissioncontroller.Hook {
 	}
 }
 
-func NewMutationWebhook2() admissioncontroller.Hook {
-	return admissioncontroller.Hook{
-		Create: mutateCreate2(),
-	}
-}
-
 /* Validating Webhooks for Pods */
 func NewValidationWebhook() admissioncontroller.Hook {
 	return admissioncontroller.Hook{

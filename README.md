@@ -102,3 +102,7 @@ What happens when you have two MutatingWebhooks, which of the two is run first? 
 > The metadata.name field is used to define the order of application of MutatingWebhooks and ValidatingWebhooks. Within the prototype, a-mutatingwebhook is applied before b-mutatingwebhook 
 > 
 > Therefore, we can have in this order of execution, a MutatingWebhook [a] which can do [0-n] operations and have a second MutatingWebhook [b] which can also do [0-n] operations.
+
+Should we specify runAsUser, runAsGroup, fsGroup field in addition to the field runAsNonRoot: true ? 
+> It is not recommanded because some images such as the jenkins/jenkins official server image runs as group:user == jenkins:jenkins. That is why we should not specify any of those fields in order to make sure the server will work properly in this case.
+

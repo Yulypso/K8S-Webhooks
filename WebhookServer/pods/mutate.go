@@ -13,39 +13,16 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 		fmt.Println("Log: POD MUTATING...")
 
 		/* Parse requested pod */
-		pod, err := unmarshalPod(r.Object.Raw)
+		/*pod, err := unmarshalPod(r.Object.Raw)
 		if err != nil {
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
-		}
+		}*/
 
 		/* Mutate Operation list */
 		var operations []admissioncontroller.PatchOperation
 
 		/* Apply pod mutating operation conditions */
-		operations = mutateRunAsRoot(pod, operations)
-
-		return &admissioncontroller.Result{
-			Allowed:  true,
-			PatchOps: operations,
-		}, nil
-	}
-}
-
-func mutateCreate2() admissioncontroller.AdmitFunc {
-	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
-		fmt.Println("Log: POD MUTATING...")
-
-		/* Parse requested pod */
-		pod, err := unmarshalPod(r.Object.Raw)
-		if err != nil {
-			return &admissioncontroller.Result{Msg: err.Error()}, nil
-		}
-
-		/* Mutate Operation list */
-		var operations []admissioncontroller.PatchOperation
-
-		/* Apply pod mutating operation conditions */
-		operations = mutateRunAsRoot(pod, operations)
+		operations = patches(operations)
 
 		return &admissioncontroller.Result{
 			Allowed:  true,

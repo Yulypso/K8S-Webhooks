@@ -17,16 +17,13 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	 * Webhooks
 	 */
 	podMutation := pods.NewMutationWebhook()
-	podMutation2 := pods.NewMutationWebhook2()
 	podValidation := pods.NewValidationWebhook()
 
 	/*
 	 * Routers
 	 */
-	//mux.HandleFunc("/mutate/podsa", admissionHandler.serve(podMutationA))
-	mux.HandleFunc("/mutate/pods/a", admissionHandler.serve(podMutation))
-	mux.HandleFunc("/mutate/pods/b", admissionHandler.serve(podMutation2))
-	mux.HandleFunc("/validate/pods", admissionHandler.serve(podValidation))
+	mux.HandleFunc("/mutate", admissionHandler.serve(podMutation))
+	mux.HandleFunc("/validate", admissionHandler.serve(podValidation))
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
