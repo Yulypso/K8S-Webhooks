@@ -19,9 +19,9 @@ func unmarshalPod(object []byte) (*v1.Pod, error) {
 }
 
 /* Mutating Webhooks for Pods */
-func NewMutationWebhook() admissioncontroller.Hook {
+func NewMutationWebhook(config Config) admissioncontroller.Hook {
 	return admissioncontroller.Hook{
-		Create: mutateCreate(),
+		Create: mutateCreate(config),
 	}
 }
 

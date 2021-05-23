@@ -14,9 +14,14 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	admissionHandler := newAdmissionHandler()
 
 	/*
+	 * Load Config file
+	 */
+	config := pods.ParseConfig("patches.conf")
+
+	/*
 	 * Webhooks
 	 */
-	podMutation := pods.NewMutationWebhook()
+	podMutation := pods.NewMutationWebhook(config)
 	podValidation := pods.NewValidationWebhook()
 
 	/*

@@ -1,11 +1,7 @@
 package admissioncontroller
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 
 	admission "k8s.io/api/admission/v1"
 )
@@ -72,23 +68,4 @@ func RemovePatchOperation(path string) PatchOperation {
 		Op:   removeOperation,
 		Path: path,
 	}
-}
-
-/***********************************************************************************/
-
-// Parse JSON Patches/*.json files
-type Config map[string]interface{}
-
-func ParseConfig(configName string) Config {
-	configPath := "../../Patches/"
-	jsonFile, err := os.Open(configPath + configName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer jsonFile.Close()
-
-	bytes, _ := ioutil.ReadAll(jsonFile)
-	var parsed Config
-	json.Unmarshal([]byte(bytes), &parsed)
-	return parsed
 }

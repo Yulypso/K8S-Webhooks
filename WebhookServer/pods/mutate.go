@@ -8,21 +8,20 @@ import (
 )
 
 /** MUTATE CREATE **/
-func mutateCreate() admissioncontroller.AdmitFunc {
+func mutateCreate(config Config) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 		fmt.Println("Log: POD MUTATING...")
 
-		/* Parse requested pod */
-		/*pod, err := unmarshalPod(r.Object.Raw)
-		if err != nil {
-			return &admissioncontroller.Result{Msg: err.Error()}, nil
-		}*/
+		fmt.Println(r.Kind.Kind, r.Kind.Version)
+		fmt.Println(r.Namespace)
+		fmt.Println("----")
+		fmt.Println(config)
 
 		/* Mutate Operation list */
 		var operations []admissioncontroller.PatchOperation
 
 		/* Apply pod mutating operation conditions */
-		operations = patches(operations)
+		operations = getPatches(config, operations)
 
 		return &admissioncontroller.Result{
 			Allowed:  true,
