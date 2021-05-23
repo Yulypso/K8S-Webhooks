@@ -10,18 +10,23 @@ import (
 /** MUTATE CREATE **/
 func mutateCreate(config Config) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
-		fmt.Println("Log: POD MUTATING...")
-
-		fmt.Println(r.Kind.Kind, r.Kind.Version)
-		fmt.Println(r.Namespace)
-		fmt.Println("----")
-		fmt.Println(config)
 
 		/* Mutate Operation list */
 		var operations []admissioncontroller.PatchOperation
 
-		/* Apply pod mutating operation conditions */
-		operations = getPatches(config, operations)
+		if r.Kind.Kind == "Pod" && r.Kind.Version == "v1" { /* Pod Mutations */
+			fmt.Println("Log: POD MUTATING")
+
+			/* get pod patches */
+			operations = getPatches(config, r.Namespace, operations)
+
+			// Add annotation
+			operations = annotate("mutate", string(r.Operation), operations)
+
+		} else if r.Kind.Kind == "Deployment" && r.Kind.Version == "v1" { /* Deployment Mutations */
+			fmt.Println("Log: DEPLOYMENT MUTATING")
+			// TODO
+		}
 
 		return &admissioncontroller.Result{
 			Allowed:  true,

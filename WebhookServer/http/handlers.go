@@ -89,7 +89,7 @@ func (h *admissionHandler) serve(hook admissioncontroller.Hook) http.HandlerFunc
 			},
 		}
 
-		/* Mutating Only */
+		/* if there are Patches */
 		if len(result.PatchOps) > 0 {
 			patchBytes, err := json.Marshal(result.PatchOps) // Get Patched operations
 			if err != nil {

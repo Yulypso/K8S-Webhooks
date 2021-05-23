@@ -10,7 +10,7 @@ import (
 /* VALIDATE CREATE */
 func validateCreate() admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
-		fmt.Println("Log: POD VALIDATING...")
+		fmt.Println("Log: POD VALIDATING")
 
 		/* Parse pod */
 		pod, err := unmarshalPod(r.Object.Raw)
