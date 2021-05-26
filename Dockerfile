@@ -21,7 +21,6 @@ RUN mkdir -p /app && \
 
 WORKDIR /app
 COPY --from=go-builder /go/src/webhookserver .
-USER app
 
 WORKDIR /app/WebhookServer/cmd/server
 CMD ["./webhookserver"]  

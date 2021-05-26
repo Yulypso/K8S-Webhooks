@@ -44,10 +44,15 @@ spec:
         app: webhookserver
     spec:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1700
-        runAsGroup: 3000
-        fsGroup: 2000
+        runAsNonRoot: false
+      serviceAccountName: thierry
+      volumes:
+      - name: webhookserver-secret
+        secret:
+          secretName: webhookserver-tls
+      - name: webhookserver-data
+        persistentVolumeClaim:
+          claimName: block-pvc
       containers:
       - name: webhookserver
         image: yulypso/webhookserver:v0.0.4
@@ -62,14 +67,12 @@ spec:
         - containerPort: 8443
           name: webhook-port
         volumeMounts:
-        - name: webhookserver-volume
+        - name: webhookserver-secret
           mountPath: /etc/secrets/tls
           readOnly: true
-      serviceAccountName: thierry
-      volumes:
-      - name: webhookserver-volume
-        secret:
-          secretName: webhookserver-tls
+        - name: webhookserver-data
+          mountPath: /dev/pv/config
+          readOnly: false
 ---
 apiVersion: v1
 kind: Service

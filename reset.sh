@@ -3,12 +3,11 @@
 echo "Reset Kubernetes Cluster..."
 
 echo "Deleting Kubernetes Objects..."
-kubectl delete -f "WebhookDeployments/webhookserver-deployment.yml" # delete webhookserver deployment
-kubectl delete -f "WebhookDeployments/mutating-webhook.yml" # delete webhookconfigurations
-kubectl delete -f "WebhookDeployments/validating-webhook.yml" # delete webhookconfigurations
-kubectl delete -f "WebhookDeployments/namespaces.yml" # delete namespaces + secrets contained + deployments/pods created
+kubectl delete -f "Deployments/Webhooks/webhookserver.yml" # delete webhookserver
+kubectl delete -f "Deployments/Webhooks/mutating-webhook.yml" # delete webhookconfigurations
+kubectl delete -f "Deployments/Webhooks/validating-webhook.yml" # delete webhookconfigurations
 
-shopt -s nocasematch # ignore case sensitive
+shopt -s nocasematch
 if [[ "$1" =~ ^certificate ]]; then
     echo "Deleting Certificates..."
     rm -rf "./Certificates"
@@ -20,6 +19,12 @@ if [[ "$1" =~ ^docker ]]; then
     docker build -t yulypso/webhookserver:v0.0.4 . 
     echo "Docker push..."
     docker push yulypso/webhookserver:v0.0.4
+    shift
+fi
+
+if [[ "$1" =~ ^cluster ]]; then
+    kubectl delete -f "Deployments/Cluster/persistent-volume.yml"
+    kubectl delete -f "Deployments/Cluster/namespace.yml"
 fi
 
 echo "Clear!"
