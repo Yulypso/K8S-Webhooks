@@ -30,6 +30,10 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	mux.HandleFunc("/mutate", admissionHandler.serve(podMutation))
 	mux.HandleFunc("/validate", admissionHandler.serve(podValidation))
 
+	/* TODO Update Config Endpoint*/
+	//add namespace
+	//remove namespace
+
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
 		TLSConfig:    certSetup(tlsCertPath, tlsKeyPath),

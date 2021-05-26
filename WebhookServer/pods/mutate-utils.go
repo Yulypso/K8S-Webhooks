@@ -11,7 +11,11 @@ import (
 
 /** UTILS **/
 
-type Config map[string]map[string][]map[string]interface{}
+//type Config map[string]Namespace
+type Config map[Namespace]OperationType
+type Namespace string
+type OperationType map[string][]Operation
+type Operation map[string]interface{}
 
 /* Parse JSON Patches/*.json files */
 func ParseConfig(configName string) Config {
@@ -36,7 +40,7 @@ func annotate(key string, value string, operations []admissioncontroller.PatchOp
 }
 
 /* Apply operations */
-func getPatches(config Config, namespace string, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+func getPatches(config Config, namespace Namespace, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
 
 	/* Remove operation */
 	for _, m := range config[namespace]["remove"] { // For each map in operation "Add"

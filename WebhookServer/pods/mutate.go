@@ -18,7 +18,7 @@ func mutateCreate(config Config) admissioncontroller.AdmitFunc {
 			fmt.Println("Log: POD MUTATING")
 
 			/* get pod patches */
-			operations = getPatches(config, r.Namespace, operations)
+			operations = getPatches(config, Namespace(r.Namespace), operations)
 
 			// Add annotation
 			operations = annotate("mutate", string(r.Operation), operations)
