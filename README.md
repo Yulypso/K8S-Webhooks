@@ -8,8 +8,6 @@
 
 <br/>
 
-## Forth implementation ()
-
 ## Setup
 
 ```bash
@@ -52,7 +50,7 @@ $ kubectl apply -f ./TestDeployments/pod-1.yml
 
 ## Reset
 
-> Reset the workspace, clean K8S objects. 
+> Reset K8S webhook server. 
 ```bash
 $ ./reset.sh
 ```
@@ -67,9 +65,9 @@ $ ./reset.sh certificates
 $ ./reset.sh docker
 ```
 
-> Both
+> Reset all K8S Cluster
 ```bash
-$ ./reset certificates docker
+$ ./reset cluster
 ```
 
 ---
