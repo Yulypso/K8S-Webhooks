@@ -2,7 +2,7 @@ Certificates/
 Save/
 target/
 TestDeployments/
-WebhookDeployments/
+Deployments/
 .gitignore
 .git
 generate-K8S-objects.sh

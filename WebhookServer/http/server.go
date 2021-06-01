@@ -4,35 +4,42 @@ import (
 	"K8S-Webhooks/WebhookServer/pods"
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
 func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server {
-	mux := http.NewServeMux()
-	admissionHandler := newAdmissionHandler()
+	/* Verify if dsl config exist */
+	dsl := os.Getenv("DSL")
+	def := os.Getenv("DEFAULT_DSL")
+	if _, err := os.Stat(dsl); os.IsNotExist(err) {
+		fmt.Printf(dsl + " does not exist, creating ...\n")
+		initConfig(def, dsl)
+	}
 
-	/*
-	 * Load Config file
-	 */
-	config := pods.ParseConfig("patches.conf")
+	/* Load Config file */
+	config := pods.ParseConfig(dsl)
 
-	/*
-	 * Webhooks
-	 */
+	/* Webhooks */
 	podMutation := pods.NewMutationWebhook(config)
 	podValidation := pods.NewValidationWebhook()
 
-	/*
-	 * Routers
-	 */
+	/* Routers */
+	mux := http.NewServeMux()
+	admissionHandler := newAdmissionHandler()
 	mux.HandleFunc("/mutate", admissionHandler.serve(podMutation))
 	mux.HandleFunc("/validate", admissionHandler.serve(podValidation))
 
-	/* TODO Update Config Endpoint*/
-	//add namespace
-	//remove namespace
+	/* TODO
+	 * Update Config Endpoints
+	 * - Add
+	 * - Remove (Namespace)
+	 */
+	mux.HandleFunc("/dsl-add", dslAdd)
+	mux.HandleFunc("/dsl-remove", dslRemove)
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
@@ -43,6 +50,23 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	}
 }
 
+/* Copy default dsl config into persistant volume */
+func initConfig(def string, dsl string) {
+	input, err := ioutil.ReadFile(def)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = ioutil.WriteFile(dsl, input, 0644)
+	if err != nil {
+		fmt.Println("Error creating", dsl)
+		fmt.Println(err)
+		return
+	}
+}
+
+/* Load tls config */
 func certSetup(certPath string, privKeyPath string) (serverTLSConf *tls.Config) {
 	serverCert, err := tls.LoadX509KeyPair(certPath, privKeyPath)
 	if err != nil {

@@ -3,14 +3,21 @@ package main
 import (
 	"K8S-Webhooks/WebhookServer/http"
 	"context"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	"k8s.io/klog/v2"
 )
 
 func main() {
+	err := godotenv.Load("../../../.env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	tlsCertPath := "/etc/secrets/tls/tls.crt"
 	tlsKeyPath := "/etc/secrets/tls/tls.key"
 	port := "8443"

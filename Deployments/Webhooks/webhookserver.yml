@@ -52,7 +52,7 @@ spec:
           secretName: webhookserver-tls
       - name: webhookserver-data
         persistentVolumeClaim:
-          claimName: block-pvc
+          claimName: webhook-pvc
       containers:
       - name: webhookserver
         image: yulypso/webhookserver:v0.0.4
@@ -71,7 +71,7 @@ spec:
           mountPath: /etc/secrets/tls
           readOnly: true
         - name: webhookserver-data
-          mountPath: /dev/pv/config
+          mountPath: /dev/webhook-pv/data
           readOnly: false
 ---
 apiVersion: v1

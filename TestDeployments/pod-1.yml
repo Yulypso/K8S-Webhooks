@@ -2,15 +2,15 @@ apiVersion: v1
 kind: Pod
 metadata:
   namespace: admissionwebhook-ns
-  name: ubuntu
+  name: node-app
   labels:
-    app: ubuntu
+    app: node-app
 spec:
   securityContext:
     runAsUser: 1200
   containers:
-  - name: ubuntu
-    image: ubuntu:latest
+  - name: node-app
+    image: yulypso/node-app:v0.0.1
     command: ["/bin/sleep", "1d"]
     imagePullPolicy: IfNotPresent
     resources: 

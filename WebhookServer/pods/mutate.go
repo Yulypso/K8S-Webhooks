@@ -28,6 +28,11 @@ func mutateCreate(config Config) admissioncontroller.AdmitFunc {
 			// TODO
 		}
 
+		/* ISSUE (Error pod deployment)
+		 * Add: Check if the field already exist or not, if YES, remove the operation from operations
+		 * Remove: Check if the field already exist or not, if NOT, remove the operation from operations
+		 */
+
 		return &admissioncontroller.Result{
 			Allowed:  true,
 			PatchOps: operations,

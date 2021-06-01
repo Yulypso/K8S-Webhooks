@@ -18,9 +18,8 @@ type OperationType map[string][]Operation
 type Operation map[string]interface{}
 
 /* Parse JSON Patches/*.json files */
-func ParseConfig(configName string) Config {
-	configPath := "../../Patches/"
-	jsonFile, err := os.Open(configPath + configName)
+func ParseConfig(config string) Config {
+	jsonFile, err := os.Open(config)
 	if err != nil {
 		log.Fatal(err)
 	}
