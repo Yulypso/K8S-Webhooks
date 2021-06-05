@@ -69,6 +69,17 @@ func sanitizeOperation(patchOps admissioncontroller.PatchOperation, podData inte
 	matched, _ := regexp.MatchString("^/([/A-Za-z0-9](\\[[\\*\\d]*\\])?(\\[[\\+\\d]*\\])?)+([A-Za-z0-9]|(\\[[\\*\\d]*\\])|(\\[[\\+\\d]*\\]))$", patchOps.Path)
 
 	if matched {
+
+		/* TO CONTINUE */
+		// sanitize add parameters (operations, operationLen) and also return them
+		/* if add {[*]}
+		/* if [*] {[+]}
+		 * 1. get size of list
+		 * 2. iterate over it
+		 * 3. Create a new operation
+		 * 4. Also replace [*] in PatchOps.Path
+		*/
+
 		/* Search for a free index if [+] */
 		if patchOps.Op == "add" && strings.Contains(patchOps.Path, "[+]") {
 			i := 0
@@ -78,7 +89,6 @@ func sanitizeOperation(patchOps admissioncontroller.PatchOperation, podData inte
 				_, err := jsonpath.Read(podData, jp)
 				if err != nil {
 					fmt.Println("-> found free id", i)
-					//TODO: Also replace [*] and add new operation
 					patchOps.Path = strings.Replace(patchOps.Path, "[+]", "/"+strconv.Itoa(i), 1)
 					return patchOps, jp, nil
 				} else {
@@ -95,7 +105,7 @@ func sanitizeOperation(patchOps admissioncontroller.PatchOperation, podData inte
 	return patchOps, "", errors.New("error: path regex unmatch: " + patchOps.Path)
 }
 
-func removeIncorrectOperation(index int, operation []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+func removeInvalidOperation(index int, operation []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
 	return append(operation[:index], operation[index+1:]...)
 }
 
@@ -139,6 +149,12 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 	operations := getOperationPerType("add", op)
 	fmt.Println(operations)
 	operationLen := len(operations)
+
+	/* parse pod yaml to JSONPath */
+	podBytes, _ := r.Object.MarshalJSON()
+	var podData interface{}
+	json.Unmarshal(podBytes, &podData)
+
 	for i := 0; i < operationLen; i++ {
 		fmt.Printf("\n*** Operation [%d/%d] ***\n", i+1, operationLen)
 		fmt.Print("Op: ")
@@ -153,11 +169,6 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 		jp := pathToJsonPath(operations[i].Path)
 		fmt.Println(jp)
 
-		/* parse pod yaml to JSONPath */
-		podBytes, _ := r.Object.MarshalJSON()
-		var podData interface{}
-		json.Unmarshal(podBytes, &podData)
-
 		/* verify operation pattern */
 		var err error
 		operations[i], jp, err = sanitizeOperation(operations[i], podData, jp)
@@ -166,7 +177,7 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 			fmt.Println(err)
 			fmt.Printf("Removing operation: ")
 			fmt.Println(operations[i])
-			operations = removeIncorrectOperation(i, operations)
+			operations = removeInvalidOperation(i, operations)
 			i--
 			operationLen--
 		} else {
@@ -178,12 +189,23 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 				fmt.Println("field already exist: bad to add")
 				fmt.Printf("Removing operation: ")
 				fmt.Println(operations[i])
-				operations = removeIncorrectOperation(i, operations)
+				operations = removeInvalidOperation(i, operations)
 				i--
 				operationLen--
 			}
 		}
 	}
+
+	/* TO CONTINUE */
+	a, _ := jsonpath.Read(podData, "$.spec.containers")
+	abyte, _ := json.Marshal(a)
+	fmt.Println(string(abyte))
+
+	var result []interface{}
+	json.Unmarshal(abyte, &result)
+	fmt.Println(result)
+	fmt.Println(len(result))
+
 	return operations
 }
 

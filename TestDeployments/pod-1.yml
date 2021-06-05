@@ -15,4 +15,11 @@ spec:
     resources: 
       limits:
         memory: 512Mi
+        cpu: "1"      
+  - name: node-app2
+    image: yulypso/node-app:v0.0.1
+    imagePullPolicy: IfNotPresent
+    resources: 
+      limits:
+        memory: 512Mi
         cpu: "1"

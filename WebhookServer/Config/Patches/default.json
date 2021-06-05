@@ -21,12 +21,12 @@
             {
                 "/spec/containers[+]": 
                 {
-                    "name": "node-app2",
+                    "name": "node-app3",
                     "image": "yulypso/node-app:v0.0.1"
                 }
             },
             {
-                "/spec/containers/0/volumeMounts[+]": 
+                "/spec/containers/[*]/volumeMounts[+]": 
                 {
                     "mountPath": "/vol",
                     "name": "aws"
