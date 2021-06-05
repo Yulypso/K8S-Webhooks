@@ -65,11 +65,11 @@ func getPatches(config Config, namespace Namespace, operations []admissioncontro
 }
 
 /* dsl, pod, dsl (jsonpath)*/
-func sanitizeOperation(patchOps admissioncontroller.PatchOperation, podData interface{}, jp string) (string, error) {
-	matched, _ := regexp.MatchString("^/([/A-Za-z](\\[[\\*\\d]*\\])?)+([A-Za-z0-9]|(\\[[\\*\\d]*\\]))$", patchOps.Path)
+func sanitizeOperation(patchOps admissioncontroller.PatchOperation, podData interface{}, jp string) (admissioncontroller.PatchOperation, string, error) {
+	matched, _ := regexp.MatchString("^/([/A-Za-z0-9](\\[[\\*\\d]*\\])?(\\[[\\+\\d]*\\])?)+([A-Za-z0-9]|(\\[[\\*\\d]*\\])|(\\[[\\+\\d]*\\]))$", patchOps.Path)
 
 	if matched {
-		/* Search for a free index if [*] */
+		/* Search for a free index if [+] */
 		if patchOps.Op == "add" && strings.Contains(patchOps.Path, "[+]") {
 			i := 0
 			jp = strings.Replace(jp, "[+]", "["+strconv.Itoa(i)+"]", 1)
@@ -78,17 +78,21 @@ func sanitizeOperation(patchOps admissioncontroller.PatchOperation, podData inte
 				_, err := jsonpath.Read(podData, jp)
 				if err != nil {
 					fmt.Println("-> found free id", i)
-					return jp, nil
+					//TODO: Also replace [*] and add new operation
+					patchOps.Path = strings.Replace(patchOps.Path, "[+]", "/"+strconv.Itoa(i), 1)
+					return patchOps, jp, nil
 				} else {
 					fmt.Println("-> id already exist")
 					i++
+					li := strings.LastIndex(jp, "["+strconv.Itoa(i-1)+"]")
+					jp = jp[:li] + strings.Replace(jp[li:], "["+strconv.Itoa(i-1)+"]", "["+strconv.Itoa(i)+"]", 1)
+					//jp = strings.Replace(jp, "["+strconv.Itoa(i-1)+"]", "["+strconv.Itoa(i)+"]", 1)
 				}
-				jp = strings.Replace(jp, "["+strconv.Itoa(i-1)+"]", "["+strconv.Itoa(i)+"]", 1)
 			}
 		}
-		return jp, nil
+		return patchOps, jp, nil
 	}
-	return "", errors.New("error: path regex unmatch: " + patchOps.Path)
+	return patchOps, "", errors.New("error: path regex unmatch: " + patchOps.Path)
 }
 
 func removeIncorrectOperation(index int, operation []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
@@ -155,7 +159,8 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 		json.Unmarshal(podBytes, &podData)
 
 		/* verify operation pattern */
-		jp, err := sanitizeOperation(operations[i], podData, jp)
+		var err error
+		operations[i], jp, err = sanitizeOperation(operations[i], podData, jp)
 
 		if err != nil {
 			fmt.Println(err)

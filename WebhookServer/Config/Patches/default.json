@@ -24,6 +24,23 @@
                     "name": "node-app2",
                     "image": "yulypso/node-app:v0.0.1"
                 }
+            },
+            {
+                "/spec/containers/0/volumeMounts[+]": 
+                {
+                    "mountPath": "/vol",
+                    "name": "aws"
+                }
+            },
+            {
+                "/spec/volumes[+]":
+                {
+                    "name": "aws",
+                    "awsElasticBlockStore":
+                    {
+                        "volumeID": "vol-00ef5554ce34943c4"
+                    }
+                }
             }
         ]
     }
