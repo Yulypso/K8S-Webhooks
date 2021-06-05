@@ -1,0 +1,30 @@
+{
+    "admissionwebhook-ns": 
+    {
+        "add": 
+        [
+            {
+                "/spec/securityContext/": 1202
+            },
+            {
+                "/spec/securityContext/runAsGroup": 1400
+            },
+            {
+                "/spec/securityContext/runAsGroup": 5000
+            },
+            {
+                "/spec/securityContext/runAsNonRoot": true
+            },
+            {
+                "/spec/securityContext/runAsUser": 1200
+            },
+            {
+                "/spec/containers[+]": 
+                {
+                    "name": "node-app2",
+                    "image": "yulypso/node-app:v0.0.1"
+                }
+            }
+        ]
+    }
+}

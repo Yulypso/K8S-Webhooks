@@ -20,7 +20,7 @@ func mutateCreate(config Config) admissioncontroller.AdmitFunc {
 			/* get pod patches */
 			operations = getPatches(config, Namespace(r.Namespace), operations)
 
-			// Add annotation
+			/* Add annotation */
 			operations = annotate("mutate", string(r.Operation), operations)
 
 		} else if r.Kind.Kind == "Deployment" && r.Kind.Version == "v1" { /* Deployment Mutations */
@@ -29,9 +29,12 @@ func mutateCreate(config Config) admissioncontroller.AdmitFunc {
 		}
 
 		/* ISSUE (Error pod deployment)
-		 * Add: Check if the field already exist or not, if YES, remove the operation from operations
-		 * Remove: Check if the field already exist or not, if NOT, remove the operation from operations
+		 * Add: Check if the field already exist or not, (if YES, remove the operation from operations)
+		 * Delete: Check if the field already exist or not, if NOT, remove the operation from operations
 		 */
+		operations = verifyAdd(operations, r)
+		operations = verifyRemove(operations, r)
+		admissioncontroller.PrintPatchOperations(operations)
 
 		return &admissioncontroller.Result{
 			Allowed:  true,

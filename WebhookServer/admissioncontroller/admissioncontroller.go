@@ -44,8 +44,14 @@ func (h *Hook) Execute(r *admission.AdmissionRequest) (*Result, error) {
 type PatchOperation struct {
 	Op    string      `json:"op"`
 	Path  string      `json:"path"`
-	From  string      `json:"from"`
 	Value interface{} `json:"value,omitempty"`
+}
+
+func PrintPatchOperations(operations []PatchOperation) {
+	fmt.Println("\nOperations applied:")
+	for _, op := range operations {
+		fmt.Println(op)
+	}
 }
 
 const (

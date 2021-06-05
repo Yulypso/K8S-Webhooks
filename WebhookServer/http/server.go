@@ -20,6 +20,10 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 		initConfig(def, dsl)
 	}
 
+	/* Used in dev */
+	initConfig(def, dsl)
+	/***************/
+
 	/* Load Config file */
 	config := pods.ParseConfig(dsl)
 
@@ -38,8 +42,7 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	 * - Add
 	 * - Remove (Namespace)
 	 */
-	mux.HandleFunc("/dsl-add", dslAdd)
-	mux.HandleFunc("/dsl-remove", dslRemove)
+	mux.HandleFunc("/namespace/{id}", Dsl)
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
