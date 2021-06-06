@@ -26,9 +26,16 @@
                 }
             },
             {
-                "/spec/containers/[*]/volumeMounts[+]": 
+                "/spec/containers[*]/volumeMounts[+]": 
                 {
                     "mountPath": "/vol",
+                    "name": "aws"
+                }
+            },
+            {
+                "/spec/containers/0/volumeMounts[+]": 
+                {
+                    "mountPath": "/specialvolume",
                     "name": "aws"
                 }
             },
@@ -42,6 +49,39 @@
                     }
                 }
             }
-        ]
+        ],
+        "remove":
+        [
+            {
+                "path": "/spec/securityContext/runAsUser"
+            }
+        ],
+        "replace":
+        [
+            {
+                "/spec/securityContext/runAsUser": 1200
+            }
+        ],
+        "mandatorydata":
+        [
+            {
+                "path": "/spec/securityContext/runAsUser"
+            },
+            {
+                "path": "/metadata/labels/a4c_nodeid"
+            },
+            {
+                "/metadata/annotations/artemis.site": "prod"
+            }
+        ],
+        "forbiddendata":
+        [
+            {
+                "/spec/securityContext/runAsUser": "0"
+            },
+            {
+                "path": "/spec/volumes[*]/hostPath"
+            }
+        ]        
     }
 }

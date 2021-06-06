@@ -65,24 +65,36 @@ func getPatches(config Config, namespace Namespace, operations []admissioncontro
 }
 
 /* dsl, pod, dsl (jsonpath)*/
-func sanitizeOperation(patchOps admissioncontroller.PatchOperation, podData interface{}, jp string) (admissioncontroller.PatchOperation, string, error) {
+func sanitizeOperation(currentOp int, podData interface{}, jp string, operations []admissioncontroller.PatchOperation, operationsLen int) (admissioncontroller.PatchOperation, string, []admissioncontroller.PatchOperation, int, error) {
+	patchOps := operations[currentOp]
+	var err error
 	matched, _ := regexp.MatchString("^/([/A-Za-z0-9](\\[[\\*\\d]*\\])?(\\[[\\+\\d]*\\])?)+([A-Za-z0-9]|(\\[[\\*\\d]*\\])|(\\[[\\+\\d]*\\]))$", patchOps.Path)
 
-	if matched {
+	if matched && patchOps.Op == "add" {
+		l := 1
+		/* Add k new operations and remove operation containing [*] */
+		if strings.Contains(jp, "[*]") {
+			li := strings.LastIndex(jp, "[*]")
+			pattern := jp[:li]
+			l = getSubPathLength(podData, pattern)
 
-		/* TO CONTINUE */
-		// sanitize add parameters (operations, operationLen) and also return them
-		/* if add {[*]}
-		/* if [*] {[+]}
-		 * 1. get size of list
-		 * 2. iterate over it
-		 * 3. Create a new operation
-		 * 4. Also replace [*] in PatchOps.Path
-		*/
-
-		/* Search for a free index if [+] */
-		if patchOps.Op == "add" && strings.Contains(patchOps.Path, "[+]") {
+			path := JsonPathToPath(jp)
+			for j := 0; j < l; j++ {
+				if j == 0 {
+					path = strings.Replace(path, "*", strconv.Itoa(j), 1)
+					err = errors.New("removing [*] operation")
+				} else {
+					path = strings.Replace(path, strconv.Itoa(j-1), strconv.Itoa(j), 1)
+				}
+				fmt.Println(path)
+				fmt.Println(patchOps.Value)
+				operations = append(operations, admissioncontroller.AddPatchOperation(path, patchOps.Value))
+				operationsLen++
+			}
+		} else if strings.Contains(patchOps.Path, "[+]") {
+			/* Search for a free index if [+] */
 			i := 0
+			err = nil
 			jp = strings.Replace(jp, "[+]", "["+strconv.Itoa(i)+"]", 1)
 			for {
 				fmt.Println(jp)
@@ -90,23 +102,22 @@ func sanitizeOperation(patchOps admissioncontroller.PatchOperation, podData inte
 				if err != nil {
 					fmt.Println("-> found free id", i)
 					patchOps.Path = strings.Replace(patchOps.Path, "[+]", "/"+strconv.Itoa(i), 1)
-					return patchOps, jp, nil
+					return patchOps, jp, operations, operationsLen, nil
 				} else {
 					fmt.Println("-> id already exist")
 					i++
 					li := strings.LastIndex(jp, "["+strconv.Itoa(i-1)+"]")
 					jp = jp[:li] + strings.Replace(jp[li:], "["+strconv.Itoa(i-1)+"]", "["+strconv.Itoa(i)+"]", 1)
-					//jp = strings.Replace(jp, "["+strconv.Itoa(i-1)+"]", "["+strconv.Itoa(i)+"]", 1)
 				}
 			}
 		}
-		return patchOps, jp, nil
+		return patchOps, jp, operations, operationsLen, err
 	}
-	return patchOps, "", errors.New("error: path regex unmatch: " + patchOps.Path)
+	return patchOps, "", operations, operationsLen, errors.New("error: path regex unmatch: " + patchOps.Path)
 }
 
-func removeInvalidOperation(index int, operation []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
-	return append(operation[:index], operation[index+1:]...)
+func removeInvalidOperation(index int, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+	return append(operations[:index], operations[index+1:]...)
 }
 
 func getOperationPerType(t string, op []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
@@ -117,6 +128,15 @@ func getOperationPerType(t string, op []admissioncontroller.PatchOperation) []ad
 		}
 	}
 	return operations
+}
+
+func getSubPathLength(podData interface{}, pattern string) int {
+	a, _ := jsonpath.Read(podData, "$.spec.containers") // ex: $.spec.container
+	b, _ := json.Marshal(a)
+
+	var res []interface{}
+	json.Unmarshal(b, &res)
+	return len(res)
 }
 
 /*
@@ -137,6 +157,20 @@ func pathToJsonPath(s string) string {
 	return jsonPath
 }
 
+func JsonPathToPath(s string) string {
+	path := ""
+	jsonPath := strings.Split(strings.TrimSpace(s), ".")
+
+	for _, item := range jsonPath[1:] {
+		if strings.Contains(item, "[*]") {
+			path += "/" + strings.Replace(item, "[*]", "/*", 1)
+		} else {
+			path += "/" + item
+		}
+	}
+	return path
+}
+
 /*func valueToJsonPath(s string) {
 	jsonPath := "$"
 }*/
@@ -148,15 +182,15 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 	fmt.Print("\nOperation Add list\n")
 	operations := getOperationPerType("add", op)
 	fmt.Println(operations)
-	operationLen := len(operations)
+	operationsLen := len(operations)
 
 	/* parse pod yaml to JSONPath */
 	podBytes, _ := r.Object.MarshalJSON()
 	var podData interface{}
 	json.Unmarshal(podBytes, &podData)
 
-	for i := 0; i < operationLen; i++ {
-		fmt.Printf("\n*** Operation [%d/%d] ***\n", i+1, operationLen)
+	for i := 0; i < operationsLen; i++ {
+		fmt.Printf("\n*** Operation [%d/%d] ***\n", i+1, operationsLen)
 		fmt.Print("Op: ")
 		fmt.Println(operations[i].Op)
 		fmt.Print("Path: ")
@@ -171,7 +205,7 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 
 		/* verify operation pattern */
 		var err error
-		operations[i], jp, err = sanitizeOperation(operations[i], podData, jp)
+		operations[i], jp, operations, operationsLen, err = sanitizeOperation(i, podData, jp, operations, operationsLen)
 
 		if err != nil {
 			fmt.Println(err)
@@ -179,7 +213,7 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 			fmt.Println(operations[i])
 			operations = removeInvalidOperation(i, operations)
 			i--
-			operationLen--
+			operationsLen--
 		} else {
 			/* try to read in pod JSONPath */
 			_, err = jsonpath.Read(podData, jp)
@@ -191,21 +225,10 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 				fmt.Println(operations[i])
 				operations = removeInvalidOperation(i, operations)
 				i--
-				operationLen--
+				operationsLen--
 			}
 		}
 	}
-
-	/* TO CONTINUE */
-	a, _ := jsonpath.Read(podData, "$.spec.containers")
-	abyte, _ := json.Marshal(a)
-	fmt.Println(string(abyte))
-
-	var result []interface{}
-	json.Unmarshal(abyte, &result)
-	fmt.Println(result)
-	fmt.Println(len(result))
-
 	return operations
 }
 
