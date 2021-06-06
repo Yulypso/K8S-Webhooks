@@ -74,7 +74,7 @@ func sanitizeOperation(currentOp int, podData interface{}, jp string, operations
 		l := 1
 		/* Add k new operations and remove operation containing [*] */
 		if strings.Contains(jp, "[*]") {
-			li := strings.LastIndex(jp, "[*]")
+			li := strings.Index(jp, "[*]")
 			pattern := jp[:li]
 			l = getSubPathLength(podData, pattern)
 
@@ -163,7 +163,7 @@ func JsonPathToPath(s string) string {
 
 	for _, item := range jsonPath[1:] {
 		if strings.Contains(item, "[*]") {
-			path += "/" + strings.Replace(item, "[*]", "/*", 1)
+			path += "/" + strings.Replace(item, "[*]", "/*", -1)
 		} else {
 			path += "/" + item
 		}
