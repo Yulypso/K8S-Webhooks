@@ -8,14 +8,28 @@ metadata:
 spec:
   securityContext:
     runAsUser: 3000
+  initContainers:
+  - name: init0
+    image: yulypso/node-app:v0.0.1
+  - name: init1
+    image: yulypso/node-app:v0.0.1
+  - name: init2
+    image: yulypso/node-app:v0.0.1
   containers:
-  - name: node-app
+  - name: node-app0
     image: yulypso/node-app:v0.0.1
     imagePullPolicy: IfNotPresent
     resources: 
       limits:
         memory: 512Mi
         cpu: "1"      
+  - name: node-app1
+    image: yulypso/node-app:v0.0.1
+    imagePullPolicy: IfNotPresent
+    resources: 
+      limits:
+        memory: 512Mi
+        cpu: "1"
   - name: node-app2
     image: yulypso/node-app:v0.0.1
     imagePullPolicy: IfNotPresent
@@ -23,3 +37,4 @@ spec:
       limits:
         memory: 512Mi
         cpu: "1"
+  

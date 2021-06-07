@@ -53,7 +53,16 @@
         "remove":
         [
             {
-                "path": "/spec/securityContext/runAsUser"
+                "path": "/spec/securityContext/"
+            },
+            {
+                "path": "/metadata/labels/app"
+            },
+            {
+                "path": "/spec/containers/2"
+            },
+            {
+                "path": "/spec/initContainers"
             }
         ],
         "replace":

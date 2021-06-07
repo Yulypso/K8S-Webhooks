@@ -64,13 +64,82 @@ func getPatches(config Config, namespace Namespace, operations []admissioncontro
 	return operations
 }
 
-/* dsl, pod, dsl (jsonpath)*/
+func removeInvalidOperation(index int, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+	return append(operations[:index], operations[index+1:]...)
+}
+
+func getOperationPerType(t string, op []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+	var operations []admissioncontroller.PatchOperation
+	for _, o := range op {
+		if o.Op == strings.ToLower(t) {
+			operations = append(operations, o)
+		}
+	}
+	return operations
+}
+
+func getSubPathLength(podData interface{}, pattern string) int {
+	a, _ := jsonpath.Read(podData, pattern) // pattern ex: $.spec.container
+	b, _ := json.Marshal(a)
+
+	var res []interface{}
+	json.Unmarshal(b, &res)
+	return len(res)
+}
+
+func appendAtIndex(index int, operations []admissioncontroller.PatchOperation, op admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+	last := len(operations) - 1
+	operations = append(operations, operations[last])
+	copy(operations[index+1:], operations[index:last])
+	operations[index] = op
+	return operations
+}
+
+/*
+ * Path to JSONPath
+ */
+func pathToJsonPath(s string) string {
+	jsonPath := "$"
+	path := strings.Split(strings.TrimSpace(s), "/")
+
+	for _, item := range path[1:] {
+		if _, err := strconv.Atoi(item); err == nil {
+			jsonPath += "[" + item + "]"
+		} else {
+			jsonPath += "." + item
+		}
+	}
+	return jsonPath
+}
+
+/*
+ * JSONPath to Path
+ */
+func JsonPathToPath(s string) string {
+	path := ""
+	jsonPath := strings.Split(strings.TrimSpace(s), ".")
+
+	for _, item := range jsonPath[1:] {
+		if strings.Contains(item, "[*]") {
+			path += "/" + strings.Replace(item, "[*]", "/*", -1)
+		} else {
+			path += "/" + item
+		}
+	}
+	return path
+}
+
 func sanitizeOperation(currentOp int, podData interface{}, jp string, operations []admissioncontroller.PatchOperation, operationsLen int) (admissioncontroller.PatchOperation, string, []admissioncontroller.PatchOperation, int, error) {
 	patchOps := operations[currentOp]
 	var err error
-	matched, _ := regexp.MatchString("^/([/A-Za-z0-9](\\[[\\*\\d]*\\])?(\\[[\\+\\d]*\\])?)+([A-Za-z0-9]|(\\[[\\*\\d]*\\])|(\\[[\\+\\d]*\\]))$", patchOps.Path)
+	err = nil
+	var matched bool
 
-	if matched && patchOps.Op == "add" {
+	switch patchOps.Op {
+	case "add":
+		if matched, _ = regexp.MatchString("^/([/A-Za-z0-9](\\[[*+]\\])?(\\[[\\d]*\\])?)+([A-Za-z0-9]|(\\[[*+]\\])|(\\[[\\d]*\\]))$", patchOps.Path); !matched {
+			break
+		}
 		l := 1
 		/* Add k new operations and remove operation containing [*] */
 		if strings.Contains(jp, "[*]") {
@@ -88,13 +157,12 @@ func sanitizeOperation(currentOp int, podData interface{}, jp string, operations
 				}
 				fmt.Println(path)
 				fmt.Println(patchOps.Value)
-				operations = append(operations, admissioncontroller.AddPatchOperation(path, patchOps.Value))
+				operations = appendAtIndex(currentOp+j+1, operations, admissioncontroller.AddPatchOperation(path, patchOps.Value))
 				operationsLen++
 			}
 		} else if strings.Contains(patchOps.Path, "[+]") {
 			/* Search for a free index if [+] */
-			i := 0
-			err = nil
+			/*i := 0
 			jp = strings.Replace(jp, "[+]", "["+strconv.Itoa(i)+"]", 1)
 			for {
 				fmt.Println(jp)
@@ -109,78 +177,43 @@ func sanitizeOperation(currentOp int, podData interface{}, jp string, operations
 					li := strings.LastIndex(jp, "["+strconv.Itoa(i-1)+"]")
 					jp = jp[:li] + strings.Replace(jp[li:], "["+strconv.Itoa(i-1)+"]", "["+strconv.Itoa(i)+"]", 1)
 				}
-			}
+			}*/
+			// TEST
+			li := strings.Index(jp, "[+]")
+			pattern := jp[:li]
+			l = getSubPathLength(podData, pattern)
+			patchOps.Path = strings.Replace(patchOps.Path, "[+]", "/"+strconv.Itoa(l), 1)
+			fmt.Println(patchOps.Path)
 		}
+		return patchOps, jp, operations, operationsLen, err
+	case "remove":
+		if matched, _ = regexp.MatchString("^/([/A-Za-z0-9](\\[[*+]\\])?(\\[[\\d]*\\])?)+([A-Za-z0-9]|(\\[[*+]\\])|(\\[[\\d]*\\]))$", patchOps.Path); !matched {
+			break
+		}
+		return patchOps, jp, operations, operationsLen, err
+	case "replace":
+		break
+	case "mandatorydata":
+		break
+	case "forbiddendata":
+		break
+	default:
 		return patchOps, jp, operations, operationsLen, err
 	}
 	return patchOps, "", operations, operationsLen, errors.New("error: path regex unmatch: " + patchOps.Path)
 }
 
-func removeInvalidOperation(index int, operations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
-	return append(operations[:index], operations[index+1:]...)
-}
-
-func getOperationPerType(t string, op []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
-	var operations []admissioncontroller.PatchOperation
-	for _, o := range op {
-		if o.Op == strings.ToLower(t) {
-			operations = append(operations, o)
-		}
-	}
-	return operations
-}
-
-func getSubPathLength(podData interface{}, pattern string) int {
-	a, _ := jsonpath.Read(podData, "$.spec.containers") // ex: $.spec.container
-	b, _ := json.Marshal(a)
-
-	var res []interface{}
-	json.Unmarshal(b, &res)
-	return len(res)
-}
-
-/*
- * To JSONPath
- */
-func pathToJsonPath(s string) string {
-	jsonPath := "$"
-	path := strings.Split(strings.TrimSpace(s), "/")
-
-	for _, item := range path[1:] {
-		if _, err := strconv.Atoi(item); err == nil { // if item looks like an integer
-			fmt.Printf("%q looks like a number.\n", item)
-			jsonPath += "[" + item + "]"
-		} else {
-			jsonPath += "." + item
-		}
-	}
-	return jsonPath
-}
-
-func JsonPathToPath(s string) string {
-	path := ""
-	jsonPath := strings.Split(strings.TrimSpace(s), ".")
-
-	for _, item := range jsonPath[1:] {
-		if strings.Contains(item, "[*]") {
-			path += "/" + strings.Replace(item, "[*]", "/*", -1)
-		} else {
-			path += "/" + item
-		}
-	}
-	return path
-}
-
-/*func valueToJsonPath(s string) {
-	jsonPath := "$"
-}*/
-
-func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRequest) []admissioncontroller.PatchOperation {
+func verifyOperations(op []admissioncontroller.PatchOperation, r *admission.AdmissionRequest) []admissioncontroller.PatchOperation {
 	fmt.Print("\nOperation list\n")
 	fmt.Println(op)
 
-	fmt.Print("\nOperation Add list\n")
-	operations := getOperationPerType("add", op)
+	var operations []admissioncontroller.PatchOperation
+	fmt.Print("\nOperation (dev) list\n")
+	adds := getOperationPerType("add", op)
+	removes := getOperationPerType("remove", op)
+
+	operations = append(operations, adds...)
+	operations = append(operations, removes...)
 	fmt.Println(operations)
 	operationsLen := len(operations)
 
@@ -215,23 +248,33 @@ func verifyAdd(op []admissioncontroller.PatchOperation, r *admission.AdmissionRe
 			i--
 			operationsLen--
 		} else {
-			/* try to read in pod JSONPath */
-			_, err = jsonpath.Read(podData, jp)
-			if err != nil {
-				fmt.Println("field doesn't exist: good to add")
-			} else {
-				fmt.Println("field already exist: bad to add")
-				fmt.Printf("Removing operation: ")
-				fmt.Println(operations[i])
-				operations = removeInvalidOperation(i, operations)
-				i--
-				operationsLen--
+			if operations[i].Op == "add" {
+				/* try to read in pod JSONPath */
+				_, err = jsonpath.Read(podData, jp)
+				if err != nil {
+					fmt.Println("field doesn't exist: good to add")
+				} else {
+					fmt.Println("field already exist: bad to add")
+					fmt.Printf("Removing operation: ")
+					fmt.Println(operations[i])
+					operations = removeInvalidOperation(i, operations)
+					i--
+					operationsLen--
+				}
+			} else if operations[i].Op == "remove" {
+				_, err = jsonpath.Read(podData, jp)
+				if err != nil {
+					fmt.Println("field doesn't exist: bad to remove")
+					fmt.Printf("Removing operation: ")
+					fmt.Println(operations[i])
+					operations = removeInvalidOperation(i, operations)
+					i--
+					operationsLen--
+				} else {
+					fmt.Println("field exist: good to remove")
+				}
 			}
 		}
 	}
-	return operations
-}
-
-func verifyRemove(operations []admissioncontroller.PatchOperation, r *admission.AdmissionRequest) []admissioncontroller.PatchOperation {
 	return operations
 }
