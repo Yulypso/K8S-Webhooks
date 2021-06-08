@@ -55,8 +55,9 @@ func PrintPatchOperations(operations []PatchOperation) {
 }
 
 const (
-	addOperation    = "add"
-	removeOperation = "remove"
+	addOperation     = "add"
+	removeOperation  = "remove"
+	replaceOperation = "replace"
 )
 
 // AddPatchOperation returns an add JSON patch operation.
@@ -73,5 +74,14 @@ func RemovePatchOperation(path string) PatchOperation {
 	return PatchOperation{
 		Op:   removeOperation,
 		Path: path,
+	}
+}
+
+// ReplacePatchOperation returns an add JSON patch operation.
+func ReplacePatchOperation(path string, value interface{}) PatchOperation {
+	return PatchOperation{
+		Op:    replaceOperation,
+		Path:  path,
+		Value: value,
 	}
 }

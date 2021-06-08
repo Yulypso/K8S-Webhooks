@@ -61,6 +61,13 @@ func getPatches(config Config, namespace Namespace, operations []admissioncontro
 			operations = append(operations, admissioncontroller.AddPatchOperation(path, value))
 		}
 	}
+
+	/* Replace operation */
+	for _, m := range config[namespace]["replace"] { // For each map in operation "Add"
+		for path, value := range m { // for each item within the current map
+			operations = append(operations, admissioncontroller.ReplacePatchOperation(path, value))
+		}
+	}
 	return operations
 }
 
@@ -178,7 +185,6 @@ func sanitizeOperation(currentOp int, podData interface{}, jp string, operations
 					jp = jp[:li] + strings.Replace(jp[li:], "["+strconv.Itoa(i-1)+"]", "["+strconv.Itoa(i)+"]", 1)
 				}
 			}*/
-			// TEST
 			li := strings.Index(jp, "[+]")
 			pattern := jp[:li]
 			l = getSubPathLength(podData, pattern)
