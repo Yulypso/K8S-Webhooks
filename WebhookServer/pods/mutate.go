@@ -20,9 +20,6 @@ func mutateCreate(config Config) admissioncontroller.AdmitFunc {
 			/* get pod patches */
 			operations = getPatches(config, Namespace(r.Namespace), operations)
 
-			/* Add annotation */
-			operations = annotate("mutate", string(r.Operation), operations)
-
 		} else if r.Kind.Kind == "Deployment" && r.Kind.Version == "v1" { /* Deployment Mutations */
 			fmt.Println("Log: DEPLOYMENT MUTATING")
 			// TODO

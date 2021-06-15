@@ -55,7 +55,7 @@ spec:
           claimName: webhook-pvc
       containers:
       - name: webhookserver
-        image: yulypso/webhookserver:v0.0.4
+        image: yulypso/webhookserver:v0.0.5
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false

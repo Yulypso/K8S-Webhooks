@@ -9,6 +9,7 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.11 // indirect
+	github.com/spyzhov/ajson v0.4.2
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect
 	k8s.io/api v0.21.1

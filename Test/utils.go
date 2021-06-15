@@ -1,42 +1,6 @@
-package admissioncontroller
+package main
 
-import (
-	"fmt"
-
-	admission "k8s.io/api/admission/v1"
-)
-
-// Result contains the result of an admission request
-type Result struct {
-	Allowed  bool
-	Msg      string
-	PatchOps []PatchOperation
-}
-
-// AdmitFunc defines how to process an admission request
-type AdmitFunc func(request *admission.AdmissionRequest) (*Result, error)
-
-// Hook represents the set of functions for each operation in an admission webhook.
-type Hook struct {
-	Create  AdmitFunc
-	Delete  AdmitFunc
-	Update  AdmitFunc
-	Connect AdmitFunc
-}
-
-func (h *Hook) Execute(r *admission.AdmissionRequest) (*Result, error) {
-	switch r.Operation {
-	case admission.Create:
-		return h.Create(r)
-	case admission.Update:
-		return h.Update(r)
-	case admission.Delete:
-		return h.Delete(r)
-	case admission.Connect:
-		return h.Connect(r)
-	}
-	return &Result{Msg: fmt.Sprintf("Error: Invalid operation: %s", r.Operation)}, nil
-}
+import "fmt"
 
 /***********************************************************************************/
 

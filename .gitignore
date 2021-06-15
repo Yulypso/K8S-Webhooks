@@ -3,3 +3,5 @@ WebhookServer/WebhookServer
 WebhookServer/main
 Certificates
 Save/
+.jsbeautifyrc
+.vscode

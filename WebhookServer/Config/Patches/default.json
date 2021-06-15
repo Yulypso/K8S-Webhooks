@@ -1,96 +1,96 @@
 {
-    "admissionwebhook-ns": 
-    {
-        "add": 
-        [
+    "admissionwebhook-ns":{
+        "add":[
             {
-                "/spec/securityContext/": 1202
+      "path":"$.spec.securityContext.runAsNonRoot",
+                "value":true
             },
             {
-                "/spec/securityContext/runAsGroup": 1400
-            },
-            {
-                "/spec/securityContext/runAsGroup": 5000
-            },
-            {
-                "/spec/securityContext/runAsNonRoot": true
-            },
-            {
-                "/spec/securityContext/runAsUser": 1200
-            },
-            {
-                "/spec/containers[+]": 
-                {
-                    "name": "node-app3",
-                    "image": "yulypso/node-app:v0.0.1"
-                }
-            },
-            {
-                "/spec/containers[*]/volumeMounts[+]": 
-                {
-                    "mountPath": "/vol",
-                    "name": "aws"
-                }
-            },
-            {
-                "/spec/containers/0/volumeMounts[+]": 
-                {
-                    "mountPath": "/specialvolume",
-                    "name": "aws"
-                }
-            },
-            {
-                "/spec/volumes[+]":
-                {
-                    "name": "aws",
-                    "awsElasticBlockStore":
-                    {
-                        "volumeID": "vol-00ef5554ce34943c4"
-                    }
+                "path":"$.spec.containers",
+                "value":{
+                    "env":[
+                        {
+                            "name":"ELASTOMCAT_HOST",
+                            "value":"http://srvelasprod.technique.artemis:9200"
+                        },
+                        {
+                            "name":"ELASTOMCAT_USERNAME",
+                            "value":"UpXo3on-wowrT8g"
+                        },
+                        {
+                            "name":"ELASTOMACT_USERPWD",
+                            "value":"Artemis2019****"
+                        }
+                    ],
+                    "image":"tomcat:8.0-alpine",
+                    "imagePullPolicy":"Always",
+                    "name":"tomcatelas--1185509365",
+                    "ports":[
+                        {
+                            "containerPort":8080,
+                            "name":"http-ext",
+                            "protocol":"TCP"
+                        }
+                    ]
                 }
             }
         ],
-        "remove":
-        [
+        "replace":[
             {
-                "path": "/spec/securityContext/"
-            },
-            {
-                "path": "/metadata/labels/app"
-            },
-            {
-                "path": "/spec/containers/2"
-            },
-            {
-                "path": "/spec/initContainers"
+                "path":"$.spec.containers[(@.name == 'containerexistant')]",
+                "value":{
+                    "env":[
+                        {
+                            "name":"elas_host",
+                            "value":"http://srvelasprod.technique.artemis:9200"
+                        },
+                        {
+                            "name":"username",
+                            "value":"anonymous"
+                        },
+                        {
+                            "name":"password",
+                            "value":"na"
+                        }
+                    ],
+                    "image":"tomcat:8.5-alpine",
+                    "imagePullPolicy":"Always",
+                    "name":"containerexistant",
+                    "ports":[
+                        {
+                            "containerPort":8080,
+                            "name":"http-ext",
+                            "protocol":"TCP"
+                        }
+                    ]
+                }
             }
         ],
-        "replace":
-        [
+        "remove":[
             {
-                "/spec/securityContext/runAsUser": 1200
+                "path":"$.spec.securityContext.runAsUser"
             }
         ],
-        "mandatorydata":
-        [
+        "mandatorydata":[
             {
-                "path": "/spec/securityContext/runAsUser"
+                "path":"$.spec.securityContext.runAsUser"
             },
             {
-                "path": "/metadata/labels/a4c_nodeid"
+                "path":"$.metadata.labels.a4c_nodeid"
             },
             {
-                "/metadata/annotations/artemis.site": "prod"
+                "path":"$.metadata.annotations.artemis.site",
+                "value":"prod"
             }
         ],
-        "forbiddendata":
-        [
+        "forbiddendata":[
             {
-                "/spec/securityContext/runAsUser": "0"
+                "path":"$.spec.securityContext.runAsUser",
+                "value":0
             },
             {
-                "path": "/spec/volumes[*]/hostPath"
+                "path":"$.spec.volumes[*].hostPath"
             }
-        ]        
+        ]
     }
 }
