@@ -38,8 +38,8 @@ func Config2Byte(config Config) []byte {
 }
 
 /* Retrieves JSON/YAML pod bytes */
-func ReadFile(pod string) []byte {
-	jsonFile, err := os.Open(pod)
+func ReadFile(file string) []byte {
+	jsonFile, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,6 +92,14 @@ func JSONPath2XPath(jpo PatchOperation, podNodes []*ajson.Node) (string, error) 
 	return "", errors.New("error: path undefined")
 }
 
+/*func getKey(i interface{}) []string {
+	keys := make([]string, 0, len(i.(map[string]interface{})))
+	for k := range i.(map[string]interface{}) {
+		keys = append(keys, k)
+	}
+	return keys
+}*/
+
 /* 1 */
 func getJsonPathOperations(config Config, namespace Namespace, jpOperations []PatchOperation) []PatchOperation {
 
@@ -142,9 +150,10 @@ func getJsonPathOperations(config Config, namespace Namespace, jpOperations []Pa
 	return jpOperations
 }
 
-func recursiveCheckType(podNodes *ajson.Node) []interface{} {
+func recursiveCheckTypeArray(podNode *ajson.Node) []interface{} {
 	var items []interface{}
-	for _, item := range podNodes.MustArray() {
+
+	for _, item := range podNode.MustArray() {
 		switch item.Type() {
 		case ajson.String:
 			items = append(items, item.MustString())
@@ -153,10 +162,38 @@ func recursiveCheckType(podNodes *ajson.Node) []interface{} {
 		case ajson.Bool:
 			items = append(items, item.MustBool())
 		case ajson.Array:
-			items = append(items, recursiveCheckType(item))
+			items = append(items, recursiveCheckTypeArray(item))
+		case ajson.Object:
+			keys := item.Keys()
+			for _, k := range keys {
+				items = append(items, recursiveCheckTypeObject(item, k))
+			}
 		}
 	}
 	return items
+}
+
+func recursiveCheckTypeObject(podNode *ajson.Node, key string) map[string]interface{} {
+	item := make(map[string]interface{})
+
+	switch podNode.MustObject()[key].Type() {
+	case ajson.String:
+		item[key] = podNode.MustObject()[key].MustString()
+	case ajson.Numeric:
+		item[key] = podNode.MustObject()[key].MustNumeric()
+	case ajson.Bool:
+		item[key] = podNode.MustObject()[key].MustBool()
+	case ajson.Array:
+		item[key] = recursiveCheckTypeArray(podNode.MustObject()[key])
+	case ajson.Object:
+		subItem := make(map[string]interface{})
+		keys := podNode.MustObject()[key].Keys()
+		for _, k := range keys {
+			subItem[k] = recursiveCheckTypeObject(podNode.MustObject()[key], k)[k]
+		}
+		item[key] = subItem
+	}
+	return item
 }
 
 /* 2-3 returns sanitized jpOperations */ //TODO : replace filename to r.*admission.AdmissionRequest
@@ -184,12 +221,11 @@ func verifyDeployment(jpOperations []PatchOperation, filename string) []PatchOpe
 				operations = append(operations, ReplacePatchOperation(xPath, jpo.Value))
 			}
 		case "mandatorydata":
-			fmt.Println("mandatorydata")
 			if err != nil { // no path found
 				fmt.Println("error - mandatory data: missing required data:", jpo.Path)
 				return operations[:0]
 			} else { //path found
-				if jpo.Value != nil { // check the value if it exists
+				if jpo.Value != nil { // check if the value exists
 					switch podNodes[0].Type() {
 					case ajson.Bool:
 						if jpo.Value != podNodes[0].MustBool() {
@@ -208,28 +244,70 @@ func verifyDeployment(jpOperations []PatchOperation, filename string) []PatchOpe
 						}
 					case ajson.Array:
 						var items []interface{}
-						items = recursiveCheckType(podNodes[0])
+						items = recursiveCheckTypeArray(podNodes[0])
 
 						if !reflect.DeepEqual(jpo.Value, items) {
 							fmt.Println("error - mandatory data: missing required data:", jpo.Value, "at:", jpo.Path)
 							return operations[:0]
 						}
-						/* TODO: case JSON Object */
-						/*case ajson.Object:
-						fmt.Println("object")
-						fmt.Println(podNodes[0].SetObject(podNodes[0].MustObject()), "***", jpo.Value)
+					case ajson.Object:
+						keys := podNodes[0].Keys()
+						item := make(map[string]interface{})
+						for _, k := range keys {
+							item[k] = recursiveCheckTypeObject(podNodes[0], k)[k]
+						}
 
-						if jpo.Value != podNodes[0].SetObject(podNodes[0].MustObject()) {
+						//fmt.Println("pod:", item)
+						//fmt.Println("jpo:", jpo.Value)
+						if !reflect.DeepEqual(jpo.Value, item) {
 							fmt.Println("error - mandatory data: missing required data:", jpo.Value, "at:", jpo.Path)
 							return operations[:0]
-						}*/
+						}
 					}
 				}
 			}
 		case "forbiddendata":
-			if err == nil {
-				fmt.Println("error - forbidden data: found forbidden data:", jpo.Path)
-				return operations[:0]
+			if err == nil { //path found
+				if jpo.Value != nil { //check if the value exists
+					switch podNodes[0].Type() {
+					case ajson.Bool:
+						if jpo.Value == podNodes[0].MustBool() {
+							fmt.Println("error - forbidden data: found forbidden data:", jpo.Value, "at:", jpo.Path)
+							return operations[:0]
+						}
+					case ajson.Numeric:
+						if jpo.Value == podNodes[0].MustNumeric() {
+							fmt.Println("error - forbidden data: found forbidden data:", jpo.Value, "at:", jpo.Path)
+							return operations[:0]
+						}
+					case ajson.String:
+						if jpo.Value == podNodes[0].MustString() {
+							fmt.Println("error - forbidden data: found forbidden data:", jpo.Value, "at:", jpo.Path)
+							return operations[:0]
+						}
+					case ajson.Array:
+						var items []interface{}
+						items = recursiveCheckTypeArray(podNodes[0])
+
+						if reflect.DeepEqual(jpo.Value, items) {
+							fmt.Println("error - forbidden data: found forbidden data:", jpo.Value, "at:", jpo.Path)
+							return operations[:0]
+						}
+					case ajson.Object:
+						keys := podNodes[0].Keys()
+						item := make(map[string]interface{})
+						for _, k := range keys {
+							item[k] = recursiveCheckTypeObject(podNodes[0], k)[k]
+						}
+						if reflect.DeepEqual(jpo.Value, item) {
+							fmt.Println("error - forbidden data: found forbidden data:", jpo.Value, "at:", jpo.Path)
+							return operations[:0]
+						}
+					}
+				} else {
+					fmt.Println("error - forbidden data: found forbidden data:", jpo.Path)
+					return operations[:0]
+				}
 			}
 		default:
 			log.Printf("- error: Operation: undefined")
@@ -240,49 +318,11 @@ func verifyDeployment(jpOperations []PatchOperation, filename string) []PatchOpe
 
 func main() {
 
-	/* 1 - Get PATCHES -> jpOperations (JSON PATH) */
 	config := Byte2Config(ReadFile("default.json"))
 	var jpOperations []PatchOperation
 	jpOperations = getJsonPathOperations(config, "admissionwebhook-ns", jpOperations)
-
-	/* 2 - validate data [mandatorydata/forbiddendata] */
-	/* 3 - jpOperations -> Verify Pod if field already exist or not */
 	operations := verifyDeployment(jpOperations, "pod.json")
-
-	/* 4 - Create operation [add/remove/replace] -> add to operations (XPATH) */
-
-	/* 5 - Apply operations */
 
 	fmt.Println("----")
 	fmt.Println(operations)
-	/* Get Config from default.json */
-	/*configBytes := ReadFile("default.json")
-	configNode := Byte2Node(configBytes)
-	configNodes := configNode.MustKey("admissionwebhook-ns").MustObject()*/
-	//configNodes, _ := configNode.JSONPath("$.admissionwebhook-ns.add")
-
-	/* Get Node from pod.json */
-	/*podBytes := ReadFile("pod.json")
-	podNode := Byte2Node(podBytes)
-	podNodes, _ := podNode.JSONPath("$.spec.volumes[*].hostPath")
-	fmt.Println(podNodes)*/
-
-	/*podBytes := ReadFile("pod.json")
-	podNode := Byte2Node(podBytes)
-	podNodes, _ := podNode.JSONPath("$.spec.containers[?(@[name] == 'node-app1')]")
-	fmt.Println(podNodes[0].Index())*/
-
-	/* Operate */
-	/*for i := 0; i < len(n); i++ {
-		fmt.Println(n[i])
-		//fmt.Println(o["path"])
-		//fmt.Println(o["value"])
-		//podNodes[0].AppendObject()
-	}*/
-
-	/*for _, configNode := range configNodes {
-		configNode.SetArray(configNode.MustArray())
-	}
-	res := Node2Byte(configNode)
-	fmt.Printf("%s", res)*/
 }

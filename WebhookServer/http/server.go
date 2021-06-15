@@ -25,6 +25,7 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	/***************/
 
 	/* Load Config file */
+
 	config := pods.ParseConfig(dsl)
 
 	/* Webhooks */

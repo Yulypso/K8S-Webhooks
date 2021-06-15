@@ -70,10 +70,37 @@
             {
                 "path": "$.spec.securityContext.runAsUser",
                 "value" : [["a", "b"], ["c"], [[["coucou"]]]]
+            },
+            {
+                "path": "$.spec.securityContext.runAsGroup",
+                "value" : {
+                    "haru": {
+                        "haru2": {
+                            "haru3":"haru4"
+                        },
+                        "haru5": {
+                            "haru6": {
+                                "haru7": "haru8",
+                                "haru9": true,
+                                "haru10": {
+                                    "haru11": ["haru12", "haru13"]
+                                }
+                            }
+                        }
+                    },
+                    "haru14": [
+                        {"haru15":"haru16"}, 
+                        {"haru17":"haru18"}
+                    ],
+                    "haru19": [
+                        {"haru20":[{"haru21": -5}]},
+                        {"haru23":[{"haru24": false}]}
+                    ]
+                }
             }
        ],
        "forbiddendata": [{
-               "path": "$.spec.securityContext.runAsUser",
+               "path": "$.spec.securityContext.runAsNonRoot",
                "value": 0
            },
            {
