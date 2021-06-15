@@ -70,8 +70,9 @@ func Node2Byte(node *ajson.Node) []byte {
 }
 
 func JSONPath2XPath(jpo PatchOperation, podNodes []*ajson.Node) (string, error) {
+
 	path := ""
-	jsonPathSplitted := strings.Split(strings.TrimSpace(jpo.Path), ".")
+	jsonPathSplitted := strings.SplitN(strings.TrimSpace(jpo.Path), ".", -1)
 	fmt.Println(jsonPathSplitted)
 
 	for _, item := range jsonPathSplitted[1:] {
@@ -83,10 +84,15 @@ func JSONPath2XPath(jpo PatchOperation, podNodes []*ajson.Node) (string, error) 
 	}
 
 	// TODO if: contains [*] => Recursive
+	if strings.Contains(path, "[*]") {
+		fmt.Println("contains [*]")
+	}
+
 	if len(podNodes) > 0 {
 		if podNodes[0].IsArray() {
 			path += "/" + fmt.Sprintf("%v", (len(podNodes[0].MustArray())))
 		}
+		fmt.Println(path)
 		return path, nil
 	}
 	return "", errors.New("error: path undefined")

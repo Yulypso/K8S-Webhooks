@@ -48,9 +48,10 @@ type PatchOperation struct {
 }
 
 func PrintPatchOperations(operations []PatchOperation) {
-	fmt.Println("\nOperations applied:")
+	fmt.Println("\nOperations:", len(operations))
 	for _, op := range operations {
-		fmt.Println(op)
+		fmt.Println("["+op.Op+"]\n- Path:", op.Path, "\n- Value:", op.Value)
+		fmt.Println()
 	}
 }
 

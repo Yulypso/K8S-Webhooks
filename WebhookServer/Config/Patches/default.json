@@ -1,111 +1,93 @@
 {
-    "admissionwebhook-ns": {
-        "add": [{
-                "path": "$.spec.securityContext.runAsNonRoot",
-                "value": true
-            },
-            {
-                "path": "$.spec.containers",
-                "value": {
-                    "env": [{
-                            "name": "ELASTOMCAT_HOST",
-                            "value": "http://srvelasprod.technique.artemis:9200"
-                        },
-                        {
-                            "name": "ELASTOMCAT_USERNAME",
-                            "value": "UpXo3on-wowrT8g"
-                        },
-                        {
-                            "name": "ELASTOMACT_USERPWD",
-                            "value": "Artemis2019****"
-                        }
-                    ],
-                    "image": "tomcat:8.0-alpine",
-                    "imagePullPolicy": "Always",
-                    "name": "tomcatelas--1185509365",
-                    "ports": [{
-                        "containerPort": 8080,
-                        "name": "http-ext",
-                        "protocol": "TCP"
-                    }]
-                }
-            }
-        ],
-        "replace": [{
-            "path": "$.spec.containers[?(@[name] == 'node-app0')]",
-            "value": {
-                "env": [{
-                        "name": "elas_host",
-                        "value": "http://srvelasprod.technique.artemis:9200"
-                    },
-                    {
-                        "name": "username",
-                        "value": "anonymous"
-                    },
-                    {
-                        "name": "password",
-                        "value": "na"
-                    }
-                ],
-                "image": "tomcat:8.5-alpine",
-                "imagePullPolicy": "Always",
-                "name": "containerexistant",
-                "ports": [{
-                    "containerPort": 8080,
-                    "name": "http-ext",
-                    "protocol": "TCP"
-                }]
-            }
-        }],
-        "remove": [{
-            "path": "$.spec.securityContext.runAsUser"
-        }],
-        "mandatorydata": [{
-                "path": "$.metadata.labels.a4c_nodeid"
-             },
-             {
-                "path": "$.metadata.annotations.artemis.site",
-                "value": "prod"
-             },
-             {
-                 "path": "$.spec.securityContext.runAsUser",
-                 "value" : [["a", "b"], ["c"], [[["coucou"]]]]
-             },
-             {
-                 "path": "$.spec.securityContext.runAsGroup",
-                 "value" : {
-                     "haru": {
-                         "haru2": {
-                             "haru3":"haru4"
-                         },
-                         "haru5": {
-                             "haru6": {
-                                 "haru7": "haru8",
-                                 "haru9": true,
-                                 "haru10": {
-                                     "haru11": ["haru12", "haru13"]
-                                 }
-                             }
-                         }
-                     },
-                     "haru14": [
-                         {"haru15":"haru16"}, 
-                         {"haru17":"haru18"}
-                     ],
-                     "haru19": [
-                         {"haru20":[{"haru21": -5}]},
-                         {"haru23":[{"haru24": false}]}
-                     ]
-                 }
-             }
-        ],
-        "forbiddendata": [{
-                "path": "$.spec.securityContext.runAsNonRoot",
-                "value": 0
-            },
-            {
-                "path": "$.spec.volumes[*].hostPath"
-            }
-        ]
-    }
+    "admissionwebhook-ns": { 
+     "add":[ 
+        { 
+           "path":"$.spec.securityContext.runAsNonRoot", 
+           "value":true 
+        }, 
+        { 
+           "path":"$.spec.containers", 
+           "value":{ 
+              "env":[ 
+                 { 
+                    "name":"ELASTOMCAT_HOST", 
+                    "value":"http://srvelasprod.technique.artemis:9200" 
+                 }, 
+                 { 
+                    "name":"ELASTOMCAT_USERNAME", 
+                    "value":"UpXo3on-wowrT8g" 
+                 }, 
+                 { 
+                    "name":"ELASTOMACT_USERPWD", 
+                    "value":"Artemis2019****" 
+                 } 
+              ], 
+              "image":"tomcat:8.0-alpine", 
+              "imagePullPolicy":"Always", 
+              "name":"tomcatelas--1185509365", 
+              "ports":[ 
+                 { 
+                    "containerPort":8080, 
+                    "name":"http-ext", 
+                    "protocol":"TCP" 
+                 } 
+              ] 
+           } 
+        } 
+     ], 
+      "replace":[ 
+        { 
+           "path": "$.spec.containers[?(@[name] == 'node-app0')]", 
+           "value":{ 
+              "env":[ 
+                 { 
+                    "name":"elas_host", 
+                    "value":"http://srvelasprod.technique.artemis:9200" 
+                 }, 
+                 { 
+                    "name":"username", 
+                    "value":"anonymous" 
+                 }, 
+                 { 
+                    "name":"password", 
+                    "value":"na" 
+                 } 
+              ], 
+              "image":"tomcat:8.5-alpine", 
+              "imagePullPolicy":"Always", 
+              "name":"containerexistant", 
+              "ports":[ 
+                 { 
+                    "containerPort":8080, 
+                    "name":"http-ext", 
+                    "protocol":"TCP" 
+                 } 
+              ] 
+           } 
+        } 
+     ],   
+     "remove":[ 
+        { 
+           "path":"$.spec.securityContext.runAsUser" 
+        } 
+     ], 
+     "mandatorydata":[ 
+        { 
+           "path":"$.metadata.labels.a4c_nodeid" 
+        }, 
+        { 
+           "path":"$.metadata.annotations.[artemis.site]", 
+           "value":"prod" 
+        } 
+     ], 
+     "forbiddendata":[ 
+        { 
+           "path":"$.spec.securityContext.runAsUser", 
+           "value":0 
+        }, 
+        { 
+           "path":"$.spec.volumes[*].hostPath" 
+        } 
+     ] 
+  } 
  }

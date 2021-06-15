@@ -25,8 +25,7 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	/***************/
 
 	/* Load Config file */
-
-	config := pods.ParseConfig(dsl)
+	config := pods.Byte2Config(pods.ReadFile(dsl))
 
 	/* Webhooks */
 	podMutation := pods.NewMutationWebhook(config)

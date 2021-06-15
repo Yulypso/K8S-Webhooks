@@ -4,7 +4,9 @@ metadata:
   namespace: admissionwebhook-ns
   name: node-app
   labels:
-    app: node-app
+    a4c_nodeid: node-app
+  annotations:
+    artemis.site: prod
 spec:
   securityContext:
     runAsUser: 3000

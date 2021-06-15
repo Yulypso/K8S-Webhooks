@@ -6,9 +6,7 @@
             "a4c_nodeid": "testlabel"
         },
         "annotations": {
-            "artemis": {
-                "site": "prod"
-            } 
+            "artemis.site": "prod"
         },
         "creationTimestamp": "2021-06-08T10:42:13Z",
         "name": "node-app",

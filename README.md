@@ -104,3 +104,21 @@ What happens when you have two MutatingWebhooks, which of the two is run first? 
 Should we specify runAsUser, runAsGroup, fsGroup field in addition to the field runAsNonRoot: true ? 
 > It is not recommanded because some images such as the jenkins/jenkins official server image runs as group:user == jenkins:jenkins. That is why we should not specify any of those fields in order to make sure the server will work properly in this case.
 
+---
+
+<br/>
+
+## JSONPath
+
+Filter must be written with: []
+- OK
+> $.spec.containers[?(@[name] == 'node-app0')]
+- KO
+> $.spec.containers[?(@.name == 'node-app0')]
+
+
+Keys containing '.' must be surrounded by []
+- OK
+> $.metadata.annotations.[artemis.site]
+- KO
+> $.metadata.annotations.artemis.site
