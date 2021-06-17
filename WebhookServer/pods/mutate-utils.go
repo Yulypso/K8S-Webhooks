@@ -86,8 +86,6 @@ func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.No
 		}
 	}
 
-	// TODO if: contains [*] => Recursive
-
 	if len(podNodes) > 0 {
 		if podNodes[0].IsArray() {
 			path += "/" + fmt.Sprintf("%v", (len(podNodes[0].MustArray())))

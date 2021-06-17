@@ -1,4 +1,4 @@
-package http
+package internal
 
 import (
 	"K8S-Webhooks/WebhookServer/pods"
@@ -36,13 +36,6 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	admissionHandler := newAdmissionHandler()
 	mux.HandleFunc("/mutate", admissionHandler.serve(podMutation))
 	mux.HandleFunc("/validate", admissionHandler.serve(podValidation))
-
-	/* TODO
-	 * Update Config Endpoints
-	 * - Add
-	 * - Remove (Namespace)
-	 */
-	mux.HandleFunc("/namespace/{id}", Dsl)
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),

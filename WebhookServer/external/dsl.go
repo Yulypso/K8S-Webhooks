@@ -1,4 +1,4 @@
-package http
+package external
 
 import (
 	"K8S-Webhooks/WebhookServer/pods"
@@ -12,7 +12,8 @@ type DslConfig string
 /* TODO
  *
  */
-func Dsl(rw http.ResponseWriter, r *http.Request) {
+func patchDsl(rw http.ResponseWriter, r *http.Request) {
+	fmt.Println("saluuut")
 	if r.Method == "PUT" {
 		fmt.Println("Log: Add DSL Request received")
 
@@ -30,5 +31,9 @@ func Dsl(rw http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "DELETE" {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		rw.Write([]byte("HTTP Method not allowed."))
+	} else if r.Method == "GET" {
+		rw.Write([]byte("Bonjour."))
+		fmt.Println("Bonjour !")
 	}
+
 }

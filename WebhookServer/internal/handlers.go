@@ -1,4 +1,4 @@
-package http
+package internal
 
 import (
 	"K8S-Webhooks/WebhookServer/admissioncontroller"

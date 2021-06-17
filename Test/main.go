@@ -83,11 +83,6 @@ func JSONPath2XPath(jpo PatchOperation, podNodes []*ajson.Node) (string, error) 
 		}
 	}
 
-	// TODO if: contains [*] => Recursive
-	if strings.Contains(path, "[*]") {
-		fmt.Println("contains [*]")
-	}
-
 	if len(podNodes) > 0 {
 		if podNodes[0].IsArray() {
 			path += "/" + fmt.Sprintf("%v", (len(podNodes[0].MustArray())))
