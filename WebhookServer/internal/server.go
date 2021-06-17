@@ -17,18 +17,15 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 	def := os.Getenv("DEFAULT_DSL")
 	if _, err := os.Stat(dsl); os.IsNotExist(err) {
 		fmt.Printf(dsl + " does not exist, creating ...\n")
-		initConfig(def, dsl)
+		InitConfig(def, dsl)
 	}
 
 	/* Used in dev */
-	initConfig(def, dsl)
+	InitConfig(def, dsl)
 	/***************/
 
-	/* Load Config file */
-	config := pods.Byte2Config(pods.ReadFile(dsl))
-
 	/* Webhooks */
-	podMutation := pods.NewMutationWebhook(config)
+	podMutation := pods.NewMutationWebhook()
 	podValidation := pods.NewValidationWebhook()
 
 	/* Routers */
@@ -47,17 +44,17 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 }
 
 /* Copy default dsl config into persistant volume */
-func initConfig(def string, dsl string) {
+func InitConfig(def string, dsl string) {
 	input, err := ioutil.ReadFile(def)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
 	err = ioutil.WriteFile(dsl, input, 0644)
 	if err != nil {
-		fmt.Println("Error creating", dsl)
-		fmt.Println(err)
+		log.Println("Error creating", dsl)
+		log.Println(err)
 		return
 	}
 }

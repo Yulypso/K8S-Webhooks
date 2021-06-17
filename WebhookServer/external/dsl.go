@@ -3,37 +3,76 @@ package external
 import (
 	"K8S-Webhooks/WebhookServer/pods"
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-type DslConfig string
-
-/* TODO
- *
- */
-func patchDsl(rw http.ResponseWriter, r *http.Request) {
-	fmt.Println("saluuut")
-	if r.Method == "PUT" {
-		fmt.Println("Log: Add DSL Request received")
-
-		var config pods.Config // TODO: Define AddDslConfig JSON : namespace => on lui rajoute des champs
-		decoder := json.NewDecoder(r.Body)
-		err := decoder.Decode(&config)
-		if err != nil {
-			panic(err)
-		}
-		defer r.Body.Close()
-
-		rw.WriteHeader(http.StatusOK)
-		json.NewEncoder(rw).Encode(config)
+/* Patch dsl config within persistant volume from external request */
+func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
+	var opType pods.OperationType
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&opType); err != nil {
+		log.Println(err)
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("Req Body must be type of pods.OperationType"))
 		return
-	} else if r.Method == "DELETE" {
-		rw.WriteHeader(http.StatusMethodNotAllowed)
-		rw.Write([]byte("HTTP Method not allowed."))
-	} else if r.Method == "GET" {
-		rw.Write([]byte("Bonjour."))
-		fmt.Println("Bonjour !")
 	}
 
+	namespace := mux.Vars(r)["name"]
+
+	configBytes, err := ioutil.ReadFile(dsl)
+	if err != nil {
+		log.Println(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+	config := pods.Byte2Config(configBytes)
+	config[pods.Namespace(namespace)] = opType
+	configBytes = pods.Config2Byte(config)
+
+	if err = ioutil.WriteFile(dsl, configBytes, 0644); err != nil {
+		log.Println(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte("Patch: DSL Config"))
+}
+
+/* Reset config to default.json */
+func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string, def string) {
+	input, err := ioutil.ReadFile(def)
+	if err != nil {
+		log.Println(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+
+	err = ioutil.WriteFile(dsl, input, 0644)
+	if err != nil {
+		log.Println(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte("Reset: DSL Config"))
+}
+
+/* Clear config to empty file */
+func clearConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
+	if err := ioutil.WriteFile(dsl, nil, 0644); err != nil {
+		log.Println(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte("Clear: DSL Config"))
 }

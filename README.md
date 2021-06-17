@@ -122,3 +122,123 @@ Keys containing '.' must be surrounded by []
 > $.metadata.annotations.[artemis.site]
 - KO
 > $.metadata.annotations.artemis.site
+
+---
+
+<br/>
+
+## HTTP Requests
+
+PATCH: DSL Config (example)
+
+```json
+> Method: PUT  
+> Endpoint: localhost:31000/namespace/\<NAMESPACE\>  
+> Body: 
+{
+    "add": [
+        {
+            "path": "$.spec.securityContext.runAsNonRoot",
+            "value": true
+        },
+        {
+            "path": "$.spec.containers",
+            "value": {
+                "env": [
+                    {
+                        "name": "ELASTOMCAT_HOST",
+                        "value": "http://srvelasprod.technique.artemis:9200"
+                    },
+                    {
+                        "name": "ELASTOMCAT_USERNAME",
+                        "value": "UpXo3on-wowrT8g"
+                    },
+                    {
+                        "name": "ELASTOMACT_USERPWD",
+                        "value": "Artemis2019****"
+                    }
+                ],
+                "image": "tomcat:8.0-alpine",
+                "imagePullPolicy": "Always",
+                "name": "tomcatelas--1185509365",
+                "ports": [
+                    {
+                        "containerPort": 8080,
+                        "name": "http-ext",
+                        "protocol": "TCP"
+                    }
+                ]
+            }
+        }
+    ],
+    "replace": [
+        {
+            "path": "$.spec.containers[?(@[name] == 'node-app0')]",
+            "value": {
+                "env": [
+                    {
+                        "name": "elas_host",
+                        "value": "http://srvelasprod.technique.artemis:9200"
+                    },
+                    {
+                        "name": "username",
+                        "value": "anonymous"
+                    },
+                    {
+                        "name": "password",
+                        "value": "na"
+                    }
+                ],
+                "image": "tomcat:8.5-alpine",
+                "imagePullPolicy": "Always",
+                "name": "containerexistant",
+                "ports": [
+                    {
+                        "containerPort": 8080,
+                        "name": "http-ext",
+                        "protocol": "TCP"
+                    }
+                ]
+            }
+        }
+    ],
+    "remove": [
+        {
+            "path": "$.spec.securityContext.runAsUser"
+        }
+    ],
+    "mandatorydata": [
+        {
+            "path": "$.metadata.labels.a4c_nodeid"
+        },
+        {
+            "path": "$.metadata.annotations.[artemis.site]",
+            "value": "prod"
+        }
+    ],
+    "forbiddendata": [
+        {
+            "path": "$.spec.securityContext.runAsUser",
+            "value": 0
+        },
+        {
+            "path": "$.spec.volumes[*].hostPath"
+        }
+    ]
+}
+```
+
+RESET: DSL Config to default.json
+``` json
+> Method: GET
+> Endpoint: localhost:31000/reset  
+> Body:   
+```
+
+
+CLEAR: DSL Config to empty file
+```json
+> Method: GET 
+> Endpoint: localhost:31000/clear  
+> Body:   
+```

@@ -4,13 +4,18 @@ import (
 	"K8S-Webhooks/WebhookServer/admissioncontroller"
 	"fmt"
 	"log"
+	"os"
 
 	admission "k8s.io/api/admission/v1"
 )
 
 /** MUTATE CREATE **/
-func mutateCreate(config Config) admissioncontroller.AdmitFunc {
+func mutateCreate() admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
+
+		/* Load Config file */
+		dsl := os.Getenv("DSL")
+		config := Byte2Config(ReadFile(dsl))
 
 		/* Mutate Operation list */
 		var jpOperations []admissioncontroller.PatchOperation

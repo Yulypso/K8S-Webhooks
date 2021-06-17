@@ -28,7 +28,7 @@ func Byte2Config(bytes []byte) Config {
 	var config Config
 	err := json.Unmarshal([]byte(bytes), &config)
 	if err != nil {
-		log.Fatalf("cannot unmarshal data: %v", err)
+		log.Printf("cannot unmarshal data: %v", err)
 	}
 	return config
 }
@@ -37,7 +37,7 @@ func Byte2Config(bytes []byte) Config {
 func Config2Byte(config Config) []byte {
 	bytes, err := json.Marshal(config)
 	if err != nil {
-		log.Fatalf("cannot marshal data: %v", err)
+		log.Printf("cannot marshal data: %v", err)
 	}
 	return bytes
 }
@@ -46,12 +46,12 @@ func Config2Byte(config Config) []byte {
 func ReadFile(file string) []byte {
 	jsonFile, err := os.Open(file)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer jsonFile.Close()
 	bytes, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		log.Fatalf("cannot read data: %v", err)
+		log.Printf("cannot read data: %v", err)
 	}
 	return bytes
 }
@@ -60,7 +60,7 @@ func ReadFile(file string) []byte {
 func Byte2Node(bytes []byte) *ajson.Node {
 	node, err := ajson.Unmarshal(bytes)
 	if err != nil {
-		log.Fatalf("cannot unmarshal data: %v", err)
+		log.Printf("cannot unmarshal data: %v", err)
 	}
 	return node
 }
@@ -69,7 +69,7 @@ func Byte2Node(bytes []byte) *ajson.Node {
 func Node2Byte(node *ajson.Node) []byte {
 	bytes, err := ajson.Marshal(node)
 	if err != nil {
-		log.Fatalf("cannot marshal data: %v", err)
+		log.Printf("cannot marshal data: %v", err)
 	}
 	return bytes
 }
