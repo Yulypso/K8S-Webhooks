@@ -123,25 +123,28 @@ func getJsonPathOperations(config Config, namespace Namespace, jpOperations []ad
 		}
 		jpOperations = append(jpOperations, admissioncontroller.ReplacePatchOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
 	}
+	return jpOperations
+}
 
-	/* MandatoryData check */
+func getJsonPathVerifications(config Config, namespace Namespace, jpVerifications []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+	/* MandatoryData verification */
 	for _, m := range config[namespace]["mandatorydata"] {
 		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
 			log.Printf("- error: MandatoryDataCheck: no path specified for \"value\": %v\n", m["value"])
 			continue
 		}
-		jpOperations = append(jpOperations, admissioncontroller.MandatoryDataCheckOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
+		jpVerifications = append(jpVerifications, admissioncontroller.MandatoryDataCheckOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
 	}
 
-	/* ForbiddenData check */
+	/* ForbiddenData verification */
 	for _, m := range config[namespace]["forbiddendata"] {
 		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
 			log.Printf("- error: MandatoryDataCheck: no path specified for \"value\": %v\n", m["value"])
 			continue
 		}
-		jpOperations = append(jpOperations, admissioncontroller.ForbiddenDataCheckOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
+		jpVerifications = append(jpVerifications, admissioncontroller.ForbiddenDataCheckOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
 	}
-	return jpOperations
+	return jpVerifications
 }
 
 func recursiveCheckTypeArray(podNode *ajson.Node) []interface{} {

@@ -19,22 +19,20 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 
 		/* Mutate Operation list */
 		var jpOperations []admissioncontroller.PatchOperation
+		var jpVerifications []admissioncontroller.PatchOperation
 
 		if r.Kind.Kind == "Pod" && r.Kind.Version == "v1" { /* Pod Mutations */
 			fmt.Println("Log: POD MUTATING")
 
 			/* get pod patches */
 			jpOperations = getJsonPathOperations(config, Namespace(r.Namespace), jpOperations)
+			jpVerifications = getJsonPathVerifications(config, Namespace(r.Namespace), jpVerifications)
 
 		} else if r.Kind.Kind == "Deployment" && r.Kind.Version == "v1" { /* Deployment Mutations */
 			fmt.Println("Log: DEPLOYMENT MUTATING")
 			// TODO
 		}
 
-		/* DOING (Error pod deployment)
-		 * Add: Check if the field already exist or not, (if YES, remove the operation from operations)
-		 * Delete: Check if the field already exist or not, if NOT, remove the operation from operations
-		 */
 		operations, err := verifyDeployment(jpOperations, r)
 		if err != nil {
 			log.Println(err)
@@ -44,7 +42,22 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 				Msg:      err.Error(),
 			}, nil
 		}
+
+		_, err = verifyDeployment(jpVerifications, r)
+		if err != nil {
+			log.Println(err)
+			return &admissioncontroller.Result{
+				Allowed:  false,
+				PatchOps: operations,
+				Msg:      err.Error(),
+			}, nil
+		}
+
+		fmt.Println("Config: Patch Operations")
 		admissioncontroller.PrintPatchOperations(jpOperations)
+		fmt.Println("Config: Verification Operations")
+		admissioncontroller.PrintPatchOperations(jpVerifications)
+		fmt.Println("Applied Operations")
 		admissioncontroller.PrintPatchOperations(operations)
 
 		return &admissioncontroller.Result{
