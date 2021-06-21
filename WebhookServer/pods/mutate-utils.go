@@ -95,7 +95,7 @@ func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.No
 	return path, errors.New("error: path undefined")
 }
 
-func getJsonPathOperations(config Config, namespace Namespace, jpOperations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+func GetJsonPathOperations(config Config, namespace Namespace, jpOperations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
 
 	/* Add operation */
 	for _, m := range config[namespace]["add"] {
@@ -126,7 +126,7 @@ func getJsonPathOperations(config Config, namespace Namespace, jpOperations []ad
 	return jpOperations
 }
 
-func getJsonPathVerifications(config Config, namespace Namespace, jpVerifications []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+func GetJsonPathVerifications(config Config, namespace Namespace, jpVerifications []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
 	/* MandatoryData verification */
 	for _, m := range config[namespace]["mandatorydata"] {
 		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
@@ -193,7 +193,7 @@ func recursiveCheckTypeObject(podNode *ajson.Node, key string) map[string]interf
 	return item
 }
 
-func verifyDeployment(jpOperations []admissioncontroller.PatchOperation, r *admission.AdmissionRequest) ([]admissioncontroller.PatchOperation, error) {
+func VerifyDeployment(jpOperations []admissioncontroller.PatchOperation, r *admission.AdmissionRequest) ([]admissioncontroller.PatchOperation, error) {
 	var operations []admissioncontroller.PatchOperation
 
 	podBytes, _ := r.Object.MarshalJSON()
@@ -202,6 +202,7 @@ func verifyDeployment(jpOperations []admissioncontroller.PatchOperation, r *admi
 	for _, jpo := range jpOperations {
 		podNodes, _ := podNode.JSONPath(jpo.Path)
 		xPath, err := JSONPath2XPath(jpo, podNodes)
+		//fmt.Println(xPath)
 
 		switch jpo.Op {
 		case "add":

@@ -25,15 +25,15 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 			fmt.Println("Log: POD MUTATING")
 
 			/* get pod patches */
-			jpOperations = getJsonPathOperations(config, Namespace(r.Namespace), jpOperations)
-			jpVerifications = getJsonPathVerifications(config, Namespace(r.Namespace), jpVerifications)
+			jpOperations = GetJsonPathOperations(config, Namespace(r.Namespace), jpOperations)
+			jpVerifications = GetJsonPathVerifications(config, Namespace(r.Namespace), jpVerifications)
 
 		} else if r.Kind.Kind == "Deployment" && r.Kind.Version == "v1" { /* Deployment Mutations */
 			fmt.Println("Log: DEPLOYMENT MUTATING")
 			// TODO
 		}
 
-		operations, err := verifyDeployment(jpOperations, r)
+		operations, err := VerifyDeployment(jpOperations, r)
 		if err != nil {
 			log.Println(err)
 			return &admissioncontroller.Result{
@@ -43,7 +43,7 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 			}, nil
 		}
 
-		_, err = verifyDeployment(jpVerifications, r)
+		_, err = VerifyDeployment(jpVerifications, r)
 		if err != nil {
 			log.Println(err)
 			return &admissioncontroller.Result{
@@ -53,11 +53,11 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 			}, nil
 		}
 
-		fmt.Println("Config: Patch Operations")
+		fmt.Print("Config: Patch Operations")
 		admissioncontroller.PrintPatchOperations(jpOperations)
-		fmt.Println("Config: Verification Operations")
+		fmt.Print("Config: Verification Operations")
 		admissioncontroller.PrintPatchOperations(jpVerifications)
-		fmt.Println("Applied Operations")
+		fmt.Print("Applied Operations")
 		admissioncontroller.PrintPatchOperations(operations)
 
 		return &admissioncontroller.Result{
