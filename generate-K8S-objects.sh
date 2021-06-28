@@ -19,6 +19,5 @@ kubectl apply -f "Deployments/Webhooks/webhookserver.yml"
 # Then create K8S validating-webhook.yml object  
 ca_cert_B64=`openssl base64 -A < "Certificates/ca.pem"`
 sed -e 's/${CA_B64}/'"$ca_cert_B64"'/g' "Deployments/Webhooks/mutating-webhook.yml" | kubectl apply -f -
-sed -e 's/${CA_B64}/'"$ca_cert_B64"'/g' "Deployments/Webhooks/validating-webhook.yml" | kubectl apply -f -
 
 echo "WebhookServer has been deployed..."

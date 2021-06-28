@@ -5,7 +5,6 @@ echo "Reset Kubernetes Cluster..."
 echo "Deleting Kubernetes Objects..."
 kubectl delete -f "Deployments/Webhooks/webhookserver.yml" # delete webhookserver
 kubectl delete -f "Deployments/Webhooks/mutating-webhook.yml" # delete webhookconfigurations
-kubectl delete -f "Deployments/Webhooks/validating-webhook.yml" # delete webhookconfigurations
 
 shopt -s nocasematch
 if [[ "$1" =~ ^certificate ]]; then

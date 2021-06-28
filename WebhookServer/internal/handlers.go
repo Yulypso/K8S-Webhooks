@@ -60,7 +60,7 @@ func getReview(h *admissionHandler, body []byte, w http.ResponseWriter) admissio
 
 func (h *admissionHandler) serve(hook admissioncontroller.Hook) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Log: Post request received")
+		klog.Infof("Post request received")
 
 		checkIsPostMethod(w, r)
 		checkContentType(w, r)

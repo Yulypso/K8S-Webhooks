@@ -27,6 +27,7 @@ func main() {
 
 	server := internal.NewServer(internalPort, tlsCertPath, tlsKeyPath)
 
+	/* Internal: Handle Hook requests */
 	go func() {
 		klog.Infof("Starting TLS internal server on port: %s", internalPort)
 		if err := server.ListenAndServeTLS("", ""); err != nil {
@@ -34,6 +35,7 @@ func main() {
 		}
 	}()
 
+	/* External: Handle Alien4Cloud requests */
 	go func() {
 		klog.Infof("Starting external server on port: %s", externalPort)
 		router := external.HandleRequests()

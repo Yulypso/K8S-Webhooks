@@ -26,13 +26,11 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 
 	/* Webhooks */
 	podMutation := pods.NewMutationWebhook()
-	podValidation := pods.NewValidationWebhook()
 
 	/* Routers */
 	mux := http.NewServeMux()
 	admissionHandler := newAdmissionHandler()
 	mux.HandleFunc("/mutate", admissionHandler.serve(podMutation))
-	mux.HandleFunc("/validate", admissionHandler.serve(podValidation))
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),

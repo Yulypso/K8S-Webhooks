@@ -22,10 +22,10 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 		var jpVerifications []admissioncontroller.PatchOperation
 
 		if r.Kind.Kind == "Pod" && r.Kind.Version == "v1" { /* Pod Mutations */
-			fmt.Println("Log: POD MUTATING")
-
 			/* get pod patches */
 			jpOperations = GetJsonPathOperations(config, Namespace(r.Namespace), jpOperations)
+
+			/* get pod verifications */
 			jpVerifications = GetJsonPathVerifications(config, Namespace(r.Namespace), jpVerifications)
 
 		} else if r.Kind.Kind == "Deployment" && r.Kind.Version == "v1" { /* Deployment Mutations */
