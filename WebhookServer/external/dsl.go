@@ -4,7 +4,6 @@ import (
 	"K8S-Webhooks/WebhookServer/pods"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -15,7 +14,6 @@ func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 	var opType pods.OperationType
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&opType); err != nil {
-		log.Println(err)
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte("Req Body must be type of pods.OperationType"))
 		return
@@ -25,7 +23,6 @@ func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 
 	configBytes, err := ioutil.ReadFile(dsl)
 	if err != nil {
-		log.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
@@ -35,7 +32,6 @@ func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 	configBytes = pods.Config2Byte(config)
 
 	if err = ioutil.WriteFile(dsl, configBytes, 0644); err != nil {
-		log.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
@@ -48,7 +44,6 @@ func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string, def string) {
 	input, err := ioutil.ReadFile(def)
 	if err != nil {
-		log.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
@@ -56,7 +51,6 @@ func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string, def string
 
 	err = ioutil.WriteFile(dsl, input, 0644)
 	if err != nil {
-		log.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
@@ -68,11 +62,17 @@ func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string, def string
 /* Clear config to empty file */
 func clearConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 	if err := ioutil.WriteFile(dsl, nil, 0644); err != nil {
-		log.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
 	}
+
+	if err := ioutil.WriteFile(dsl, []byte("{}"), 0644); err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte("Clear: DSL Config"))
 }

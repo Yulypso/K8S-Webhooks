@@ -1,1 +1,10 @@
-{}
+{
+    "admissionwebhook-ns":{
+        "add":[
+            {
+                "path":"$.spec.containers[*].securityContext.allowPrivilegeEscalation",
+                "value":false
+            }
+        ]
+    }
+}

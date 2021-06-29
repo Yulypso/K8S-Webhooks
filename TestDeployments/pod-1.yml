@@ -24,7 +24,9 @@ spec:
     resources: 
       limits:
         memory: 512Mi
-        cpu: "1"      
+        cpu: "1"
+    securityContext:
+      allowPrivilegeEscalation: true    
   - name: node-app1
     image: yulypso/node-app:v0.0.1
     imagePullPolicy: IfNotPresent
@@ -32,6 +34,8 @@ spec:
       limits:
         memory: 512Mi
         cpu: "1"
+    securityContext:
+      allowPrivilegeEscalation: true    
   - name: node-app2
     image: yulypso/node-app:v0.0.1
     imagePullPolicy: IfNotPresent
@@ -39,4 +43,6 @@ spec:
       limits:
         memory: 512Mi
         cpu: "1"
+    securityContext:
+      allowPrivilegeEscalation: true    
   

@@ -202,7 +202,7 @@ func VerifyDeployment(jpOperations []admissioncontroller.PatchOperation, r *admi
 	for _, jpo := range jpOperations {
 		podNodes, _ := podNode.JSONPath(jpo.Path)
 		xPath, err := JSONPath2XPath(jpo, podNodes)
-		//fmt.Println(xPath)
+		//fmt.Println("***", podNodes)
 
 		switch jpo.Op {
 		case "add":
