@@ -15,9 +15,9 @@ fi
 
 if [[ "$1" =~ ^docker ]]; then
     echo "Docker build..."
-    docker build -t yulypso/webhookserver:v0.0.5 . 
+    docker build -t yulypso/webhookserver:v0.0.6 . 
     #echo "Docker push..."
-    #docker push yulypso/webhookserver:v0.0.5
+    #docker push yulypso/webhookserver:v0.0.6
     shift
 fi
 

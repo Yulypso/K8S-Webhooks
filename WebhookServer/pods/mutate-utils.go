@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/spyzhov/ajson"
@@ -74,7 +75,7 @@ func Node2Byte(node *ajson.Node) []byte {
 	return bytes
 }
 
-func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.Node) (string, error) {
+func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.Node, re1 *regexp.Regexp, re2 *regexp.Regexp) (string, error) {
 	path := ""
 	jsonPathSplitted := strings.SplitN(strings.TrimSpace(jpo.Path), ".", -1)
 
@@ -90,6 +91,10 @@ func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.No
 		if podNodes[0].IsArray() {
 			path += "/" + fmt.Sprintf("%v", (len(podNodes[0].MustArray())))
 		}
+
+		path = re1.ReplaceAllString(path, `/`)
+		path = re2.ReplaceAllString(path, ``)
+
 		return path, nil
 	}
 	return path, errors.New("error: path undefined")
@@ -193,16 +198,67 @@ func recursiveCheckTypeObject(podNode *ajson.Node, key string) map[string]interf
 	return item
 }
 
+func PatchJPOperations(jpOperations []admissioncontroller.PatchOperation, podNode *ajson.Node) []admissioncontroller.PatchOperation {
+	var patchedJpoperations []admissioncontroller.PatchOperation
+	nbOp := len(jpOperations)
+
+	for i := 0; i < nbOp; i++ {
+		if strings.Contains(jpOperations[i].Path, "[*]") {
+			fmt.Println("contains [*]:", jpOperations[i].Path)
+			split := strings.SplitN(jpOperations[i].Path, "[*]", -1)
+			fmt.Println("splitted:", split[0])
+			podNodes, _ := podNode.JSONPath(split[0])
+
+			if len(podNodes) > 0 {
+				if podNodes[0].IsArray() {
+					ignored := strings.Replace(jpOperations[i].Path, split[0]+"[*]", "", 1)
+					for j := 0; j < len(podNodes[0].MustArray()); j++ {
+						newPath := split[0] + "[" + fmt.Sprint(j) + "]" + ignored
+						fmt.Println("new Path:", newPath)
+						switch jpOperations[i].Op {
+						case "add":
+							jpOperations = append(jpOperations, admissioncontroller.AddPatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
+							nbOp++
+						case "remove":
+							jpOperations = append(jpOperations, admissioncontroller.RemovePatchOperation(fmt.Sprintf("%v", newPath)))
+							nbOp++
+						case "replace":
+							jpOperations = append(jpOperations, admissioncontroller.ReplacePatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
+							nbOp++
+						case "mandatorydata":
+							jpOperations = append(jpOperations, admissioncontroller.MandatoryDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
+							nbOp++
+						case "forbiddendata":
+							jpOperations = append(jpOperations, admissioncontroller.ForbiddenDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
+							nbOp++
+						default:
+							log.Printf("- error: Operation: undefined")
+						}
+					}
+				}
+			}
+		} else {
+			patchedJpoperations = append(patchedJpoperations, jpOperations[i])
+		}
+	}
+	return patchedJpoperations
+}
+
 func VerifyDeployment(jpOperations []admissioncontroller.PatchOperation, r *admission.AdmissionRequest) ([]admissioncontroller.PatchOperation, error) {
 	var operations []admissioncontroller.PatchOperation
 
 	podBytes, _ := r.Object.MarshalJSON()
 	podNode := Byte2Node(podBytes)
 
+	jpOperations = PatchJPOperations(jpOperations, podNode)
+
+	var re1 = regexp.MustCompile(`\[`)
+	var re2 = regexp.MustCompile(`\]`)
+
 	for _, jpo := range jpOperations {
 		podNodes, _ := podNode.JSONPath(jpo.Path)
-		xPath, err := JSONPath2XPath(jpo, podNodes)
-		//fmt.Println("***", podNodes)
+		fmt.Println("aaaa", podNodes)
+		xPath, err := JSONPath2XPath(jpo, podNodes, re1, re2)
 
 		switch jpo.Op {
 		case "add":
