@@ -61,18 +61,23 @@ func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string, def string
 
 /* Clear config to empty file */
 func clearConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
-	if err := ioutil.WriteFile(dsl, nil, 0644); err != nil {
+	namespace := mux.Vars(r)["name"]
+
+	configBytes, err := ioutil.ReadFile(dsl)
+	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
 	}
+	config := pods.Byte2Config(configBytes)
+	delete(config, pods.Namespace(namespace))
+	configBytes = pods.Config2Byte(config)
 
-	if err := ioutil.WriteFile(dsl, []byte("{}"), 0644); err != nil {
+	if err = ioutil.WriteFile(dsl, configBytes, 0644); err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
 	}
-
 	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte("Clear: DSL Config"))
 }
