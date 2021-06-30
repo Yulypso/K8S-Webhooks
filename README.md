@@ -133,7 +133,7 @@ PATCH: DSL Config (example)
 
 ```json
 > Method: PUT  
-> Endpoint: localhost:31000/namespace/\<NAMESPACE\>  
+> Endpoint: localhost:31000/namespace/<NAMESPACE>  
 > Body: 
 {
     "add": [
@@ -228,7 +228,7 @@ PATCH: DSL Config (example)
 }
 ```
 
-RESET: DSL Config to default.json
+RESET: DSL Config to the initial default.json (empty config => {})
 ``` json
 > Method: GET
 > Endpoint: localhost:31000/reset  
@@ -236,9 +236,9 @@ RESET: DSL Config to default.json
 ```
 
 
-CLEAR: DSL Config to empty file
+CLEAR: DSL Config by namespace
 ```json
 > Method: GET 
-> Endpoint: localhost:31000/clear  
+> Endpoint: localhost:31000/clear/<NAMESPACE>  
 > Body:   
 ```
