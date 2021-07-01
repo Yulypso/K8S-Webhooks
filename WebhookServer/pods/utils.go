@@ -1,6 +1,7 @@
 package pods
 
 import (
+	"K8S-Webhooks/WebhookServer/Alien4Cloud"
 	"K8S-Webhooks/WebhookServer/admissioncontroller"
 	"encoding/json"
 	"errors"
@@ -109,7 +110,8 @@ func appendAtIndex(array []admissioncontroller.PatchOperation, val admissioncont
 
 func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.Node, re1 *regexp.Regexp, re2 *regexp.Regexp) (string, error) {
 	path := ""
-	jsonPathSplitted := strings.SplitN(strings.TrimSpace(jpo.Path), ".", -1)
+
+	jsonPathSplitted := Alien4Cloud.CheckPathPattern(jpo.Path, podNodes)
 
 	for _, item := range jsonPathSplitted[1:] {
 		if strings.Contains(item, "?(@") {
@@ -126,11 +128,13 @@ func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.No
 
 		path = re1.ReplaceAllString(path, `/`)
 		path = re2.ReplaceAllString(path, ``)
-
+		path = strings.ReplaceAll(path, "//", "/")
 		return path, nil
 	}
+
 	path = re1.ReplaceAllString(path, `/`)
 	path = re2.ReplaceAllString(path, ``)
+	path = strings.ReplaceAll(path, "//", "/")
 	return path, errors.New("error: no path found")
 }
 
@@ -197,31 +201,31 @@ func PatchJPOperations(jpOperations []admissioncontroller.PatchOperation, podNod
 						newPath := split[0] + "[" + fmt.Sprint(j) + "]" + ignored
 						switch jpOperations[i].Op {
 						case "add":
-							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.AddPatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1)
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.AddPatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1+j)
 							if err != nil {
 								log.Println(err)
 							}
 							nbOp++
 						case "remove":
-							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.RemovePatchOperation(fmt.Sprintf("%v", newPath)), i+1)
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.RemovePatchOperation(fmt.Sprintf("%v", newPath)), i+1+j)
 							if err != nil {
 								log.Println(err)
 							}
 							nbOp++
 						case "replace":
-							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.ReplacePatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1)
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.ReplacePatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1+j)
 							if err != nil {
 								log.Println(err)
 							}
 							nbOp++
 						case "mandatorydata":
-							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.MandatoryDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1)
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.MandatoryDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1+j)
 							if err != nil {
 								log.Println(err)
 							}
 							nbOp++
 						case "forbiddendata":
-							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.ForbiddenDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1)
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.ForbiddenDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1+j)
 							if err != nil {
 								log.Println(err)
 							}
