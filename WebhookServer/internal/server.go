@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -51,13 +52,18 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 
 /* Copy default dsl config into persistant volume */
 func InitConfig(def string, dsl string) {
+	var mutex sync.Mutex
+	mutex.Lock()
 	input, err := ioutil.ReadFile(def)
+	mutex.Unlock()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
+	mutex.Lock()
 	err = ioutil.WriteFile(dsl, input, 0644)
+	mutex.Unlock()
 	if err != nil {
 		log.Println("Error creating", dsl)
 		log.Println(err)

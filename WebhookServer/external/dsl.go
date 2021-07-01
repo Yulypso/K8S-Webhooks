@@ -3,7 +3,6 @@ package external
 import (
 	"K8S-Webhooks/WebhookServer/pods"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -21,7 +20,7 @@ func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 
 	namespace := mux.Vars(r)["name"]
 
-	configBytes, err := ioutil.ReadFile(dsl)
+	configBytes, err := SyncReadFile(dsl)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
@@ -31,7 +30,7 @@ func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 	config[pods.Namespace(namespace)] = opType
 	configBytes = pods.Config2Byte(config)
 
-	if err = ioutil.WriteFile(dsl, configBytes, 0644); err != nil {
+	if err = SyncWriteFile(dsl, configBytes); err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
@@ -42,14 +41,14 @@ func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 
 /* Reset config to default.json */
 func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string, def string) {
-	input, err := ioutil.ReadFile(def)
+	input, err := SyncReadFile(def)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
 	}
 
-	err = ioutil.WriteFile(dsl, input, 0644)
+	err = SyncWriteFile(dsl, input)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
@@ -63,7 +62,7 @@ func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string, def string
 func clearConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 	namespace := mux.Vars(r)["name"]
 
-	configBytes, err := ioutil.ReadFile(dsl)
+	configBytes, err := SyncReadFile(dsl)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
@@ -73,7 +72,7 @@ func clearConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 	delete(config, pods.Namespace(namespace))
 	configBytes = pods.Config2Byte(config)
 
-	if err = ioutil.WriteFile(dsl, configBytes, 0644); err != nil {
+	if err = SyncWriteFile(dsl, configBytes); err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return

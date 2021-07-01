@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/spyzhov/ajson"
 	admission "k8s.io/api/admission/v1"
@@ -69,7 +70,10 @@ func ReadFile(file string) []byte {
 		log.Println(err)
 	}
 	defer jsonFile.Close()
+	var mutex sync.Mutex
+	mutex.Lock()
 	bytes, err := ioutil.ReadAll(jsonFile)
+	mutex.Unlock()
 	if err != nil {
 		log.Printf("cannot read data: %v", err)
 	}

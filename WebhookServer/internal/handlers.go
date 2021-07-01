@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sync"
 
 	admission "k8s.io/api/admission/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,7 +41,10 @@ func checkContentType(w http.ResponseWriter, r *http.Request) {
 }
 
 func getBodyRequest(w http.ResponseWriter, r *http.Request) []byte {
+	var mutex sync.Mutex
+	mutex.Lock()
 	body, err := ioutil.ReadAll(r.Body)
+	mutex.Unlock()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("could not read request body: %v", err), http.StatusBadRequest)
 	}
