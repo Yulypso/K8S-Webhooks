@@ -21,16 +21,11 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 
 		/* Mutate Operation list */
 		var jpOperations []admissioncontroller.PatchOperation
-		//var jpVerifications []admissioncontroller.PatchOperation
 
 		if r.Kind.Kind == "Pod" && r.Kind.Version == "v1" { /* Pod Mutations */
 			/* get pod patches */
 			jpOperations = GetJsonPathOperations(config, Namespace(r.Namespace), jpOperations)
 			jpOperations = GetJSONPathCommonOperations(commonConfig, jpOperations)
-
-			/* get pod verifications */
-			//jpVerifications = GetJsonPathVerifications(config, Namespace(r.Namespace), jpVerifications)
-			//jpVerifications = GetJsonPathCommonVerifications(commonConfig, jpVerifications)
 
 		} else if r.Kind.Kind == "Deployment" && r.Kind.Version == "v1" { /* Deployment Mutations */
 			fmt.Println("Log: DEPLOYMENT MUTATING")
@@ -47,16 +42,6 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 			}, nil
 		}
 		sort.Slice(operations, func(i, j int) bool { return operations[i].Op < operations[j].Op })
-
-		/*_, err = VerifyDeployment(jpVerifications, r)
-		if err != nil {
-			log.Println(err)
-			return &admissioncontroller.Result{
-				Allowed:  false,
-				PatchOps: operations,
-				Msg:      err.Error(),
-			}, nil
-		}*/
 
 		fmt.Print("Config: Patch Operations")
 		admissioncontroller.PrintPatchOperations(jpOperations)

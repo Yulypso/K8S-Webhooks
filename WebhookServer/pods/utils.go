@@ -15,9 +15,6 @@ import (
 	"github.com/spyzhov/ajson"
 )
 
-/** UTILS **/
-
-//type Config map[string]Namespace
 type Config map[Namespace]OperationType
 type Namespace string
 type OperationType map[string][]Operation

@@ -10,3 +10,4 @@ generate-keys.sh
 reset.sh
 webhookserver.csr.cnf
 README.md
+.jsbeautifyrc
