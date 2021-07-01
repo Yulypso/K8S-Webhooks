@@ -43,6 +43,25 @@ func Config2Byte(config Config) []byte {
 	return bytes
 }
 
+/* Convert []byte to Config */
+func Byte2OpType(bytes []byte) OperationType {
+	var opType OperationType
+	err := json.Unmarshal([]byte(bytes), &opType)
+	if err != nil {
+		log.Printf("cannot unmarshal data: %v", err)
+	}
+	return opType
+}
+
+/* Convert Config to []byte */
+func OpType2Byte(opType OperationType) []byte {
+	bytes, err := json.Marshal(opType)
+	if err != nil {
+		log.Printf("cannot marshal data: %v", err)
+	}
+	return bytes
+}
+
 /* Retrieves JSON/YAML pod bytes */
 func ReadFile(file string) []byte {
 	jsonFile, err := os.Open(file)
@@ -97,7 +116,40 @@ func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.No
 
 		return path, nil
 	}
+
+	path = re1.ReplaceAllString(path, `/`)
+	path = re2.ReplaceAllString(path, ``)
 	return path, errors.New("error: path undefined")
+}
+
+func GetJSONPathCommonOperations(opType OperationType, jpOperations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+	/* Add operation */
+	for _, m := range opType["add"] {
+		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
+			log.Printf("- error: AddOperation: no path specified for \"value\": %v\n", m["value"])
+			continue
+		}
+		jpOperations = append(jpOperations, admissioncontroller.AddPatchOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
+	}
+
+	/* Remove operation */
+	for _, m := range opType["remove"] {
+		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
+			log.Printf("- error: RemoveOperation: No path specified")
+			continue
+		}
+		jpOperations = append(jpOperations, admissioncontroller.RemovePatchOperation(fmt.Sprintf("%v", m["path"])))
+	}
+
+	/* Replace operation */
+	for _, m := range opType["replace"] {
+		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
+			log.Printf("- error: ReplaceOperation: no path specified for \"value\": %v\n", m["value"])
+			continue
+		}
+		jpOperations = append(jpOperations, admissioncontroller.ReplacePatchOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
+	}
+	return jpOperations
 }
 
 func GetJsonPathOperations(config Config, namespace Namespace, jpOperations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
@@ -129,6 +181,27 @@ func GetJsonPathOperations(config Config, namespace Namespace, jpOperations []ad
 		jpOperations = append(jpOperations, admissioncontroller.ReplacePatchOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
 	}
 	return jpOperations
+}
+
+func GetJsonPathCommonVerifications(opType OperationType, jpVerifications []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
+	/* MandatoryData verification */
+	for _, m := range opType["mandatorydata"] {
+		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
+			log.Printf("- error: MandatoryDataCheck: no path specified for \"value\": %v\n", m["value"])
+			continue
+		}
+		jpVerifications = append(jpVerifications, admissioncontroller.MandatoryDataCheckOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
+	}
+
+	/* ForbiddenData verification */
+	for _, m := range opType["forbiddendata"] {
+		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
+			log.Printf("- error: MandatoryDataCheck: no path specified for \"value\": %v\n", m["value"])
+			continue
+		}
+		jpVerifications = append(jpVerifications, admissioncontroller.ForbiddenDataCheckOperation(fmt.Sprintf("%v", m["path"]), m["value"]))
+	}
+	return jpVerifications
 }
 
 func GetJsonPathVerifications(config Config, namespace Namespace, jpVerifications []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
@@ -204,9 +277,7 @@ func PatchJPOperations(jpOperations []admissioncontroller.PatchOperation, podNod
 
 	for i := 0; i < nbOp; i++ {
 		if strings.Contains(jpOperations[i].Path, "[*]") {
-			fmt.Println("contains [*]:", jpOperations[i].Path)
 			split := strings.SplitN(jpOperations[i].Path, "[*]", -1)
-			fmt.Println("splitted:", split[0])
 			podNodes, _ := podNode.JSONPath(split[0])
 
 			if len(podNodes) > 0 {
@@ -214,7 +285,6 @@ func PatchJPOperations(jpOperations []admissioncontroller.PatchOperation, podNod
 					ignored := strings.Replace(jpOperations[i].Path, split[0]+"[*]", "", 1)
 					for j := 0; j < len(podNodes[0].MustArray()); j++ {
 						newPath := split[0] + "[" + fmt.Sprint(j) + "]" + ignored
-						fmt.Println("new Path:", newPath)
 						switch jpOperations[i].Op {
 						case "add":
 							jpOperations = append(jpOperations, admissioncontroller.AddPatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
@@ -257,7 +327,6 @@ func VerifyDeployment(jpOperations []admissioncontroller.PatchOperation, r *admi
 
 	for _, jpo := range jpOperations {
 		podNodes, _ := podNode.JSONPath(jpo.Path)
-		fmt.Println("aaaa", podNodes)
 		xPath, err := JSONPath2XPath(jpo, podNodes, re1, re2)
 
 		switch jpo.Op {
@@ -267,13 +336,13 @@ func VerifyDeployment(jpOperations []admissioncontroller.PatchOperation, r *admi
 			if len(podNodes) > 0 && err == nil {
 				operations = append(operations, admissioncontroller.RemovePatchOperation(xPath))
 			} else {
-				log.Println("remove:", err)
+				log.Println("remove:", err, ":", xPath)
 			}
 		case "replace":
 			if len(podNodes) > 0 && err == nil {
 				operations = append(operations, admissioncontroller.ReplacePatchOperation(xPath, jpo.Value))
 			} else {
-				log.Println("replace:", err)
+				log.Println("replace:", err, ":", xPath, ",", jpo.Value)
 			}
 		case "mandatorydata":
 			if err != nil { // no path found

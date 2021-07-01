@@ -15,7 +15,9 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 
 		/* Load Config file */
 		dsl := os.Getenv("DSL")
+		common := os.Getenv("COMMON")
 		config := Byte2Config(ReadFile(dsl))
+		commonConfig := Byte2OpType(ReadFile(common))
 
 		/* Mutate Operation list */
 		var jpOperations []admissioncontroller.PatchOperation
@@ -24,9 +26,13 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 		if r.Kind.Kind == "Pod" && r.Kind.Version == "v1" { /* Pod Mutations */
 			/* get pod patches */
 			jpOperations = GetJsonPathOperations(config, Namespace(r.Namespace), jpOperations)
+			jpOperations = GetJSONPathCommonOperations(commonConfig, jpOperations)
+
+			fmt.Println(jpOperations)
 
 			/* get pod verifications */
 			jpVerifications = GetJsonPathVerifications(config, Namespace(r.Namespace), jpVerifications)
+			jpVerifications = GetJsonPathCommonVerifications(commonConfig, jpVerifications)
 
 		} else if r.Kind.Kind == "Deployment" && r.Kind.Version == "v1" { /* Deployment Mutations */
 			fmt.Println("Log: DEPLOYMENT MUTATING")

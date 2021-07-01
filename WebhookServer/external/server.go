@@ -9,8 +9,8 @@ import (
 )
 
 func HandleRequests() *mux.Router {
-	dsl := os.Getenv("DSL")
 	def := os.Getenv("DEFAULT_DSL")
+	dsl := os.Getenv("DSL")
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/namespace/{name:[A-Za-z0-9-]+}", func(rw http.ResponseWriter, r *http.Request) {

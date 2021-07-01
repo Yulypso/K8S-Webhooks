@@ -1,0 +1,24 @@
+{
+    "add":[
+        {
+            "path":"$.spec.securityContext.runAsNonRoot",
+            "value":true
+        }
+    ],
+    "remove":[
+        {
+            "path":"$.spec.volumes[*].hostPath"
+        }
+    ],
+    "mandatorydata":[
+        {
+            "path":"$.spec.securityContext.runAsNonRoot",
+            "value":true
+        }
+    ],
+    "forbiddendata":[
+        {
+            "path":"$.spec.volumes[*].hostPath"
+        }
+    ]
+}
