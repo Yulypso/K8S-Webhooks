@@ -1,0 +1,27 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration 
+metadata:
+  name: validatingwebhook
+webhooks:
+  - name: pod-validation.webhookserver-ns.svc 
+    timeoutSeconds: 10
+    failurePolicy: Fail
+    admissionReviewVersions: ["v1", "v1beta1"]
+    namespaceSelector:
+      matchLabels:
+        kubewebhook: enabled 
+    sideEffects: None
+    matchPolicy: Equivalent 
+    clientConfig:
+      service:
+        name: webhookserver 
+        namespace: webhookserver-ns
+        path: "/validate" 
+        port: 443 
+      caBundle: ${CA_B64} 
+    rules:
+      - operations: ["CREATE"] 
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["pods"]
+        scope: "Namespaced"

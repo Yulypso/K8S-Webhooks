@@ -8,6 +8,10 @@
     "remove":[
         {
             "path":"$.spec.volumes[*].hostPath"
+        },
+        {
+            "path":"$.spec.securityContext.runAsNonRoot",
+            "value":false
         }
     ],
     "mandatorydata":[
@@ -19,6 +23,14 @@
     "forbiddendata":[
         {
             "path":"$.spec.volumes[*].hostPath"
+        },
+        {
+            "path": "$.spec.securityContext.runAsUser",
+            "value": 0
+        },
+        {
+            "path":"$.spec.securityContext.runAsNonRoot",
+            "value":false
         }
     ]
 }

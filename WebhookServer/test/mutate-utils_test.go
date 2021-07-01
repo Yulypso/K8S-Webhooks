@@ -79,9 +79,9 @@ func TestVerifyDeployment(t *testing.T) {
 	jpOperations = pods.GetJsonPathOperations(config, pods.Namespace((&r).Namespace), jpOperations)
 	jpVerifications = pods.GetJsonPathVerifications(config, pods.Namespace((&r).Namespace), jpVerifications)
 
-	operations, _ := pods.VerifyDeployment(jpOperations, (&r))
+	operations, _ := pods.VerifyMutation(jpOperations, (&r))
 
-	_, _ = pods.VerifyDeployment(jpVerifications, (&r))
+	_ = pods.VerifyValidation(jpVerifications, (&r))
 
 	/* operations contains only Patch operations */
 	if len(operations) != len(jpOperations) {

@@ -10,3 +10,10 @@ func NewMutationWebhook() admissioncontroller.Hook {
 		Create: mutateCreate(),
 	}
 }
+
+/* Validating Webhooks for Pods */
+func NewValidationWebhook() admissioncontroller.Hook {
+	return admissioncontroller.Hook{
+		Create: validateCreate(),
+	}
+}

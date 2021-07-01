@@ -21,12 +21,12 @@ func HandleRequests() *mux.Router {
 	router.HandleFunc("/reset", func(rw http.ResponseWriter, r *http.Request) {
 		resetConfig(rw, r, dsl, def)
 		klog.Infof("Reset: DSL Config")
-	}).Methods("GET")
+	}).Methods("DELETE")
 
-	router.HandleFunc("/clear/{name:[A-Za-z0-9-]+}", func(rw http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/namespace/{name:[A-Za-z0-9-]+}", func(rw http.ResponseWriter, r *http.Request) {
 		clearConfig(rw, r, dsl)
 		klog.Infof("Clear: DSL Config")
-	}).Methods("GET")
+	}).Methods("DELETE")
 
 	return router
 }
