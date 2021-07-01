@@ -127,7 +127,51 @@ Keys containing '.' must be surrounded by []
 
 <br/>
 
-## HTTP Requests
+## Default DSL Config (common to all deployed pods)
+```json
+{
+    "add":[
+        {
+            "path":"$.spec.securityContext.runAsNonRoot",
+            "value":true
+        }
+    ],
+    "remove":[
+        {
+            "path":"$.spec.volumes[*].hostPath"
+        },
+        {
+            "path":"$.spec.securityContext.runAsNonRoot",
+            "value":false
+        }
+    ],
+    "mandatorydata":[
+        {
+            "path":"$.spec.securityContext.runAsNonRoot",
+            "value":true
+        }
+    ],
+    "forbiddendata":[
+        {
+            "path":"$.spec.volumes[*].hostPath"
+        },
+        {
+            "path": "$.spec.securityContext.runAsUser",
+            "value": 0
+        },
+        {
+            "path":"$.spec.securityContext.runAsNonRoot",
+            "value":false
+        }
+    ]
+}
+```
+
+---
+
+<br/>
+
+## HTTP Requests (import from Postman directory)
 
 PATCH: DSL Config (example)
 
@@ -138,8 +182,13 @@ PATCH: DSL Config (example)
 {
     "add": [
         {
-            "path": "$.spec.securityContext.runAsNonRoot",
-            "value": true
+            "path": "$.spec.containers[*].securityContext.allowPrivilegeEscalation",
+            "value": false
+        },
+
+        {
+            "path": "$.metadata.annotations.[co.elastic.logs/multiline.pattern]",
+            "value": "^\d{4}-\d{2}-\d{2}"
         },
         {
             "path": "$.spec.containers",
@@ -220,9 +269,6 @@ PATCH: DSL Config (example)
         {
             "path": "$.spec.securityContext.runAsUser",
             "value": 0
-        },
-        {
-            "path": "$.spec.volumes[*].hostPath"
         }
     ]
 }
@@ -230,7 +276,7 @@ PATCH: DSL Config (example)
 
 RESET: DSL Config to the initial default.json (empty config => {})
 ``` json
-> Method: GET
+> Method: DELETE
 > Endpoint: localhost:31000/reset  
 > Body:   
 ```
@@ -238,7 +284,7 @@ RESET: DSL Config to the initial default.json (empty config => {})
 
 CLEAR: DSL Config by namespace
 ```json
-> Method: GET 
-> Endpoint: localhost:31000/clear/<NAMESPACE>  
+> Method: DELETE 
+> Endpoint: localhost:31000/namespace/<NAMESPACE>  
 > Body:   
 ```

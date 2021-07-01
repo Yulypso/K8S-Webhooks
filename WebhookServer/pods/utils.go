@@ -110,8 +110,13 @@ func appendAtIndex(array []admissioncontroller.PatchOperation, val admissioncont
 
 func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.Node, re1 *regexp.Regexp, re2 *regexp.Regexp) (string, error) {
 	path := ""
+	var jsonPathSplitted []string
 
-	jsonPathSplitted := Alien4Cloud.CheckPathPattern(jpo.Path, podNodes)
+	if strings.Contains(jpo.Path, ".[") && strings.Contains(jpo.Path, "]") {
+		jsonPathSplitted = Alien4Cloud.CheckPathPattern(jpo.Path, podNodes)
+	} else {
+		jsonPathSplitted = strings.SplitN(strings.TrimSpace(jpo.Path), ".", -1)
+	}
 
 	for _, item := range jsonPathSplitted[1:] {
 		if strings.Contains(item, "?(@") {
