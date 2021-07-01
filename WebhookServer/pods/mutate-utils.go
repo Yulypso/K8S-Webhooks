@@ -65,13 +65,13 @@ func OpType2Byte(opType OperationType) []byte {
 
 /* Retrieves JSON/YAML pod bytes */
 func ReadFile(file string) []byte {
+	var mutex sync.Mutex
+	mutex.Lock()
 	jsonFile, err := os.Open(file)
 	if err != nil {
 		log.Println(err)
 	}
 	defer jsonFile.Close()
-	var mutex sync.Mutex
-	mutex.Lock()
 	bytes, err := ioutil.ReadAll(jsonFile)
 	mutex.Unlock()
 	if err != nil {
@@ -96,6 +96,20 @@ func Node2Byte(node *ajson.Node) []byte {
 		log.Printf("cannot marshal data: %v", err)
 	}
 	return bytes
+}
+
+/* Append element at a specific index */
+func appendAtIndex(array []admissioncontroller.PatchOperation, val admissioncontroller.PatchOperation, i int) ([]admissioncontroller.PatchOperation, error) {
+	length := len(array)
+	if i > length {
+		return array, errors.New("error: index is out of slice range")
+	}
+
+	array = append(array, array[length-1])
+	copy(array[i+1:], array[i:])
+	array[i] = val
+
+	return array, nil
 }
 
 func JSONPath2XPath(jpo admissioncontroller.PatchOperation, podNodes []*ajson.Node, re1 *regexp.Regexp, re2 *regexp.Regexp) (string, error) {
@@ -157,7 +171,6 @@ func GetJSONPathCommonOperations(opType OperationType, jpOperations []admissionc
 }
 
 func GetJsonPathOperations(config Config, namespace Namespace, jpOperations []admissioncontroller.PatchOperation) []admissioncontroller.PatchOperation {
-
 	/* Add operation */
 	for _, m := range config[namespace]["add"] {
 		if m["path"] == nil || m["path"] == "" { //TODO: Compiled Regex
@@ -277,6 +290,7 @@ func recursiveCheckTypeObject(podNode *ajson.Node, key string) map[string]interf
 
 func PatchJPOperations(jpOperations []admissioncontroller.PatchOperation, podNode *ajson.Node) []admissioncontroller.PatchOperation {
 	var patchedJpoperations []admissioncontroller.PatchOperation
+	var err error
 	nbOp := len(jpOperations)
 
 	for i := 0; i < nbOp; i++ {
@@ -291,19 +305,35 @@ func PatchJPOperations(jpOperations []admissioncontroller.PatchOperation, podNod
 						newPath := split[0] + "[" + fmt.Sprint(j) + "]" + ignored
 						switch jpOperations[i].Op {
 						case "add":
-							jpOperations = append(jpOperations, admissioncontroller.AddPatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
+							fmt.Println(jpOperations[i], i)
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.AddPatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1)
+							if err != nil {
+								log.Println(err)
+							}
 							nbOp++
 						case "remove":
-							jpOperations = append(jpOperations, admissioncontroller.RemovePatchOperation(fmt.Sprintf("%v", newPath)))
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.RemovePatchOperation(fmt.Sprintf("%v", newPath)), i+1)
+							if err != nil {
+								log.Println(err)
+							}
 							nbOp++
 						case "replace":
-							jpOperations = append(jpOperations, admissioncontroller.ReplacePatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.ReplacePatchOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1)
+							if err != nil {
+								log.Println(err)
+							}
 							nbOp++
 						case "mandatorydata":
-							jpOperations = append(jpOperations, admissioncontroller.MandatoryDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.MandatoryDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1)
+							if err != nil {
+								log.Println(err)
+							}
 							nbOp++
 						case "forbiddendata":
-							jpOperations = append(jpOperations, admissioncontroller.ForbiddenDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value))
+							jpOperations, err = appendAtIndex(jpOperations, admissioncontroller.ForbiddenDataCheckOperation(fmt.Sprintf("%v", newPath), jpOperations[i].Value), i+1)
+							if err != nil {
+								log.Println(err)
+							}
 							nbOp++
 						default:
 							log.Printf("- error: Operation: undefined")

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 
 	admission "k8s.io/api/admission/v1"
 )
@@ -28,8 +29,6 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 			jpOperations = GetJsonPathOperations(config, Namespace(r.Namespace), jpOperations)
 			jpOperations = GetJSONPathCommonOperations(commonConfig, jpOperations)
 
-			fmt.Println(jpOperations)
-
 			/* get pod verifications */
 			jpVerifications = GetJsonPathVerifications(config, Namespace(r.Namespace), jpVerifications)
 			jpVerifications = GetJsonPathCommonVerifications(commonConfig, jpVerifications)
@@ -48,6 +47,7 @@ func mutateCreate() admissioncontroller.AdmitFunc {
 				Msg:      err.Error(),
 			}, nil
 		}
+		sort.Slice(operations, func(i, j int) bool { return operations[i].Op < operations[j].Op })
 
 		_, err = VerifyDeployment(jpVerifications, r)
 		if err != nil {
