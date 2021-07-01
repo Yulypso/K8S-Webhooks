@@ -26,6 +26,51 @@ subjects:
   name: thierry
   namespace: webhookserver-ns
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-dsl
+  namespace: webhookserver-ns
+immutable: true
+data:
+  common.conf: |-
+    {
+        "add":[
+            {
+                "path":"$.spec.securityContext.runAsNonRoot",
+                "value":true
+            }
+        ],
+        "remove":[
+            {
+                "path":"$.spec.volumes[*].hostPath"
+            },
+            {
+                "path":"$.spec.securityContext.runAsNonRoot",
+                "value":false
+            }
+        ],
+        "mandatorydata":[
+            {
+                "path":"$.spec.securityContext.runAsNonRoot",
+                "value":true
+            }
+        ],
+        "forbiddendata":[
+            {
+                "path":"$.spec.volumes[*].hostPath"
+            },
+            {
+                "path": "$.spec.securityContext.runAsUser",
+                "value": 0
+            },
+            {
+                "path":"$.spec.securityContext.runAsNonRoot",
+                "value":false
+            }
+        ]
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -53,6 +98,9 @@ spec:
       - name: webhookserver-data
         persistentVolumeClaim:
           claimName: webhook-pvc
+      - name: webhookserver-common-dsl
+        configMap:
+          name: common-dsl
       containers:
       - name: webhookserver
         image: yulypso/webhookserver:v0.0.6
@@ -73,6 +121,9 @@ spec:
         - name: webhookserver-data
           mountPath: /dev/webhook-pv/data
           readOnly: false
+        - name: webhookserver-common-dsl
+          mountPath: /dev/configmap/data
+          readOnly: true
 ---
 apiVersion: v1
 kind: Service
