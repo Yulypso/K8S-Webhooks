@@ -65,11 +65,6 @@ $ ./reset.sh certificates
 $ ./reset.sh docker
 ```
 
-> Reset all K8S Cluster
-```bash
-$ ./reset cluster
-```
-
 ---
 
 <br/>

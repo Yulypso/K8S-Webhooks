@@ -8,6 +8,11 @@ metadata:
   annotations:
     artemis.site: prod
 spec:
+  volumes:
+  - name: test-volume
+    hostPath:
+      path: /data
+      type: Directory
   securityContext:
     runAsUser: 3000
   initContainers:

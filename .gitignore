@@ -1,7 +1,10 @@
 .DS_Store
 WebhookServer/WebhookServer
 WebhookServer/main
+WebhookServer/cmd/server/webhookserver
 Certificates
 Save/
 .jsbeautifyrc
 .vscode
+
+Makefile

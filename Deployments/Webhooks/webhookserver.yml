@@ -89,7 +89,7 @@ spec:
         app: webhookserver
     spec:
       securityContext:
-        runAsNonRoot: false
+        fsGroup: 1007
       serviceAccountName: thierry
       volumes:
       - name: webhookserver-secret
@@ -119,10 +119,10 @@ spec:
           mountPath: /etc/secrets/tls
           readOnly: true
         - name: webhookserver-data
-          mountPath: /dev/webhook-pv/data
+          mountPath: /home/app/dev/webhook-pv/data
           readOnly: false
         - name: webhookserver-common-dsl
-          mountPath: /dev/configmap/data
+          mountPath: /home/app/dev/webhook-configmap/data
           readOnly: true
 ---
 apiVersion: v1

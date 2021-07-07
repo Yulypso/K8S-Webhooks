@@ -11,3 +11,5 @@ reset.sh
 webhookserver.csr.cnf
 README.md
 .jsbeautifyrc
+runTest.sh
+Postman/
