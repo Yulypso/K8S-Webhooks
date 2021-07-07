@@ -202,7 +202,13 @@ func PatchJPOperations(jpOperations []admissioncontroller.PatchOperation, podNod
 			if len(podNodes) > 0 {
 				if podNodes[0].IsArray() {
 					ignored := strings.Replace(jpOperations[i].Path, split[0]+"[*]", "", 1)
-					for j := 0; j < len(podNodes[0].MustArray()); j++ {
+
+					l := len(podNodes[0].MustArray())
+					if strings.Contains(string(Node2Byte(podNodes[0])), "default-token") { //ignore default-token
+						l--
+					}
+
+					for j := 0; j < l; j++ {
 						newPath := split[0] + "[" + fmt.Sprint(j) + "]" + ignored
 						switch jpOperations[i].Op {
 						case "add":
