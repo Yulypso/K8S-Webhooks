@@ -7,10 +7,13 @@ metadata:
 spec:
   storageClassName: webhook
   persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
   capacity:
     storage: 100Mi
   accessModes:
     - ReadWriteOnce
+  #local:
+  #  path: /mnt/data
   hostPath:
     path: "/mnt/data"
 ---

@@ -89,6 +89,7 @@ spec:
         app: webhookserver
     spec:
       securityContext:
+        runAsNonRoot: true
         fsGroup: 1007
       serviceAccountName: thierry
       volumes:

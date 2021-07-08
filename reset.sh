@@ -22,8 +22,8 @@ if [[ "$1" =~ ^docker ]]; then
     CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o WebhookServer/cmd/server/webhookserver WebhookServer/cmd/server/*.go
     echo "Docker build..."
     docker build -t yulypso/webhookserver:v0.0.6 . 
-    echo "Docker push..."
-    docker push yulypso/webhookserver:v0.0.6
+    #echo "Docker push..."
+    #docker push yulypso/webhookserver:v0.0.6
     shift
 fi
 

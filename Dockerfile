@@ -31,6 +31,6 @@ COPY --from=go-builder /go/src/webhookserver .
 
 WORKDIR /home/app/WebhookServer/cmd/server
 
-# USER app
+USER 1007
 
 CMD ["./webhookserver"]  
