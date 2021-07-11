@@ -7,8 +7,14 @@ echo "Generate Kubernetes objects ..."
 kubectl apply -f "Deployments/Cluster/namespace.yml" # contains webhookserver-namespace and admissionwebhook-namespace
 
 # Create Persistent-volume
+data_dir="data"
 hostname=`kubectl get nodes -o json | jq -r '.items[].metadata.name'`
-sed -e 's/${HOSTNAME}/'"$hostname"'/g' "Deployments/Cluster/persistent-volume.yml" | kubectl apply -f -
+volume_path="`pwd`/WebhookServer/$data_dir"
+
+mkdir -p WebhookServer/$data_dir
+sed -e 's/${HOSTNAME}/'"$hostname"'/g' "Deployments/Cluster/persistent-volume.yml" | 
+sed -e 's*${VOLUME_PATH}*'"$volume_path"'*g' |
+kubectl apply -f -
 
 # Create Secrets to store TLS certificate
 kubectl -n webhookserver-ns create secret tls webhookserver-tls --key "Certificates/webhookservertls.key" --cert "Certificates/webhookservertls.cert"

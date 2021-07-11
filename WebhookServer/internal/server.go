@@ -4,7 +4,6 @@ import (
 	"K8S-Webhooks/WebhookServer/pods"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -21,10 +20,6 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 		fmt.Printf(dsl + " does not exist, creating ...\n")
 		InitConfig(def, dsl)
 	}
-
-	/* Used in dev */
-	InitConfig(def, dsl)
-	/***************/
 
 	/* Webhooks */
 	podMutation := pods.NewMutationWebhook()
@@ -49,18 +44,17 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 func InitConfig(def string, dsl string) {
 	var mutex sync.Mutex
 	mutex.Lock()
-	input, err := ioutil.ReadFile(def)
-	mutex.Unlock()
+	input, err := os.ReadFile(def)
+
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	mutex.Lock()
-	err = ioutil.WriteFile(dsl, input, 0644)
+	err = os.WriteFile(dsl, input, 0644)
 	mutex.Unlock()
 	if err != nil {
-		log.Println("Error creating", dsl)
+		log.Println("Error creating", dsl, ":", err)
 		log.Println(err)
 		return
 	}

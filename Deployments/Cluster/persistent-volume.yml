@@ -13,14 +13,14 @@ metadata:
     type: local
 spec:
   storageClassName: local-storage
-  persistentVolumeReclaimPolicy: Retain
+  persistentVolumeReclaimPolicy: Delete
   volumeMode: Filesystem
   capacity:
     storage: 100Mi
   accessModes:
     - ReadWriteOnce
   local:
-    path: /mnt/data
+    path: ${VOLUME_PATH}
   nodeAffinity:
     required:
       nodeSelectorTerms:
