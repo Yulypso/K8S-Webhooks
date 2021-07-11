@@ -1,3 +1,10 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -5,18 +12,24 @@ metadata:
   labels:
     type: local
 spec:
-  storageClassName: webhook
+  storageClassName: local-storage
   persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
   capacity:
     storage: 100Mi
   accessModes:
     - ReadWriteOnce
-  #local:
-  #  path: /mnt/data
-  hostPath:
-    path: "/mnt/data"
----
+  local:
+    path: /mnt/data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - ${HOSTNAME}
+---      
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -25,7 +38,7 @@ metadata:
   labels: 
     app: webhookserver
 spec:
-  storageClassName: webhook
+  storageClassName: local-storage
   accessModes:
     - ReadWriteOnce
   resources:
