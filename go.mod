@@ -11,5 +11,5 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0
 	k8s.io/api v0.21.2
 	k8s.io/apimachinery v0.21.2
-	k8s.io/klog/v2 v2.9.0
+	k8s.io/klog/v2 v2.10.0
 )

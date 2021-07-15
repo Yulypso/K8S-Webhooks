@@ -99,7 +99,7 @@ spec:
       - name: webhookserver-data
         persistentVolumeClaim:
           claimName: webhook-pvc
-      - name: webhookserver-common-dsl
+      - name: webhookserver-common
         configMap:
           name: common-dsl
       containers:
@@ -122,7 +122,7 @@ spec:
         - name: webhookserver-data
           mountPath: /home/app/dev/webhook-pv/data
           readOnly: false
-        - name: webhookserver-common-dsl
+        - name: webhookserver-common
           mountPath: /home/app/dev/webhook-configmap/data
           readOnly: true
 ---
