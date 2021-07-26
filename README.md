@@ -24,10 +24,17 @@ $ cd K8S-Webhooks
 
 > Generate CA certificate/CA private key 
 > Generate server certificate/server private key signed by CA private key
-
 ```bash
 $ ./generate-keys.sh
 ```
+
+> Add label on the server deployment node
+```bash
+# replace <node> by the desired node
+$ kubectl label nodes <node> webhook=true
+```
+
+
 
 > Generate Kubernetes objects for webhooks within webhookserver-ns namespace
 ```bash
