@@ -53,15 +53,8 @@ func patchConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
 }
 
 /* Reset config to default.json */
-func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string, def string) {
-	input, err := SyncReadFile(def)
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		rw.Write([]byte(err.Error()))
-		return
-	}
-
-	err = SyncWriteFile(dsl, input)
+func resetConfig(rw http.ResponseWriter, r *http.Request, dsl string) {
+	err := SyncWriteFile(dsl, []byte("{}"))
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))

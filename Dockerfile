@@ -5,7 +5,6 @@ FROM golang:1.15-alpine as go-builder
 
 WORKDIR /go/src/webhookserver
 COPY .env .
-COPY WebhookServer/Config WebhookServer/Config
 COPY WebhookServer/cmd/server/webhookserver WebhookServer/cmd/server/webhookserver
 #RUN go mod download
 

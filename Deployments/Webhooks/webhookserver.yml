@@ -44,10 +44,6 @@ data:
         "remove":[
             {
                 "path":"$.spec.volumes[*].hostPath"
-            },
-            {
-                "path":"$.spec.securityContext.runAsNonRoot",
-                "value":false
             }
         ],
         "mandatorydata":[

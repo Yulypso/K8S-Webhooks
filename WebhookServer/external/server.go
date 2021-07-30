@@ -9,7 +9,6 @@ import (
 )
 
 func HandleRequests() *mux.Router {
-	def := os.Getenv("DEFAULT_DSL")
 	dsl := os.Getenv("DSL")
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -19,7 +18,7 @@ func HandleRequests() *mux.Router {
 	}).Methods("PUT")
 
 	router.HandleFunc("/reset", func(rw http.ResponseWriter, r *http.Request) {
-		resetConfig(rw, r, dsl, def)
+		resetConfig(rw, r, dsl)
 		klog.Infof("Reset: DSL Config")
 	}).Methods("DELETE")
 

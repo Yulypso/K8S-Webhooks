@@ -13,12 +13,11 @@ import (
 
 func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server {
 	/* Verify if dsl config exist */
-	def := os.Getenv("DEFAULT_DSL")
 	dsl := os.Getenv("DSL")
 
 	if _, err := os.Stat(dsl); os.IsNotExist(err) {
 		fmt.Printf(dsl + " does not exist, creating ...\n")
-		InitConfig(def, dsl)
+		InitConfig(dsl)
 	}
 
 	/* Webhooks */
@@ -41,17 +40,11 @@ func NewServer(port string, tlsCertPath string, tlsKeyPath string) *http.Server 
 }
 
 /* Copy default dsl config into persistant volume */
-func InitConfig(def string, dsl string) {
+func InitConfig(dsl string) {
 	var mutex sync.Mutex
 	mutex.Lock()
-	input, err := os.ReadFile(def)
 
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	err = os.WriteFile(dsl, input, 0644)
+	err := os.WriteFile(dsl, []byte("{}"), 0644)
 	mutex.Unlock()
 	if err != nil {
 		log.Println("Error creating", dsl, ":", err)
