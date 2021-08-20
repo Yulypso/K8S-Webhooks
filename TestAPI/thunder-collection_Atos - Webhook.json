@@ -1,0 +1,99 @@
+{
+    "client":"Thunder Client",
+    "collectionName":"Atos - Webhook",
+    "dateExported":"2021-07-30T23:03:56.660Z",
+    "version":"1.1",
+    "folders":[
+       
+    ],
+    "requests":[
+       {
+          "containerId":"",
+          "sortNum":20000,
+          "headers":[
+             {
+                "name":"Accept",
+                "value":"*/*"
+             },
+             {
+                "name":"User-Agent",
+                "value":"Thunder Client (https://www.thunderclient.io)"
+             }
+          ],
+          "colId":"0c6b6a70-9735-4e4e-85ce-1c2fd069d258",
+          "name":"PATCH",
+          "url":"localhost:31000/namespace/admissionwebhook-ns",
+          "method":"PUT",
+          "modified":"2021-07-30T10:22:39.163Z",
+          "created":"2021-07-10T19:13:18.475Z",
+          "_id":"bc63a276-069a-4690-98a1-0a8568cd9c44",
+          "params":[
+             
+          ],
+          "body":{
+             "type":"json",
+             "raw":"{\n    \"add\": [\n        {\n            \"path\": \"$.spec.containers[*].securityContext.allowPrivilegeEscalation\",\n            \"value\": false\n        },\n        {\n            \"path\": \"$.metadata.annotations.[co.elastic.logs/multiline.pattern]\",\n            \"value\": \"^\\d{4}-\\d{2}-\\d{2}\"\n        },\n        {\n            \"path\": \"$.spec.containers\",\n            \"value\": {\n                \"env\": [\n                    {\n                        \"name\": \"ELASTOMCAT_HOST\",\n                        \"value\": \"http://srvelasprod.technique.artemis:9200\"\n                    },\n                    {\n                        \"name\": \"ELASTOMCAT_USERNAME\",\n                        \"value\": \"UpXo3on-wowrT8g\"\n                    },\n                    {\n                        \"name\": \"ELASTOMACT_USERPWD\",\n                        \"value\": \"Artemis2019****\"\n                    }\n                ],\n                \"image\": \"tomcat:8.0-alpine\",\n                \"imagePullPolicy\": \"Always\",\n                \"name\": \"tomcatelas--1185509365\",\n                \"ports\": [\n                    {\n                        \"containerPort\": 8080,\n                        \"name\": \"http-ext\",\n                        \"protocol\": \"TCP\"\n                    }\n                ]\n            }\n        }\n    ],\n    \"replace\": [\n        {\n            \"path\": \"$.spec.containers[?(@[name] == 'node-app0')]\",\n            \"value\": {\n                \"env\": [\n                    {\n                        \"name\": \"elas_host\",\n                        \"value\": \"http://srvelasprod.technique.artemis:9200\"\n                    },\n                    {\n                        \"name\": \"username\",\n                        \"value\": \"anonymous\"\n                    },\n                    {\n                        \"name\": \"password\",\n                        \"value\": \"na\"\n                    }\n                ],\n                \"image\": \"tomcat:8.5-alpine\",\n                \"imagePullPolicy\": \"Always\",\n                \"name\": \"containerexistant\",\n                \"ports\": [\n                    {\n                        \"containerPort\": 8080,\n                        \"name\": \"http-ext\",\n                        \"protocol\": \"TCP\"\n                    }\n                ]\n            }\n        }\n    ],\n    \"remove\": [\n        {\n            \"path\": \"$.spec.securityContext.runAsUser\"\n        }\n    ],\n    \"mandatorydata\": [\n        {\n            \"path\": \"$.metadata.labels.a4c_nodeid\"\n        },\n        {\n            \"path\": \"$.metadata.annotations.[artemis.site]\",\n            \"value\": \"prod\"\n        }\n    ],\n    \"forbiddendata\": [\n        {\n            \"path\": \"$.spec.securityContext.runAsUser\",\n            \"value\": 0\n        }\n    ]\n}",
+             "form":[
+                
+             ]
+          },
+          "tests":[
+             
+          ]
+       },
+       {
+          "containerId":"",
+          "sortNum":30000,
+          "headers":[
+             {
+                "name":"Accept",
+                "value":"*/*"
+             },
+             {
+                "name":"User-Agent",
+                "value":"Thunder Client (https://www.thunderclient.io)"
+             }
+          ],
+          "colId":"0c6b6a70-9735-4e4e-85ce-1c2fd069d258",
+          "name":"RESET",
+          "url":"localhost:31000/reset",
+          "method":"DELETE",
+          "modified":"2021-07-30T10:15:00.395Z",
+          "created":"2021-07-10T19:14:51.066Z",
+          "_id":"4233f623-d380-43da-b8e1-bcba9de9ad42",
+          "params":[
+             
+          ],
+          "tests":[
+             
+          ]
+       },
+       {
+          "containerId":"",
+          "sortNum":50000,
+          "headers":[
+             {
+                "name":"Accept",
+                "value":"*/*"
+             },
+             {
+                "name":"User-Agent",
+                "value":"Thunder Client (https://www.thunderclient.io)"
+             }
+          ],
+          "colId":"0c6b6a70-9735-4e4e-85ce-1c2fd069d258",
+          "name":"DELETE",
+          "url":"localhost:31000/namespace/admissionwebhook-ns",
+          "method":"DELETE",
+          "modified":"2021-07-30T10:11:37.064Z",
+          "created":"2021-07-10T19:15:15.765Z",
+          "_id":"382655a4-fc34-4784-9e6f-811f9b3de67f",
+          "params":[
+             
+          ],
+          "tests":[
+             
+          ]
+       }
+    ]
+}
