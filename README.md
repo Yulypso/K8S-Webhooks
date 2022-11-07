@@ -6,6 +6,10 @@
 
 ---
 
+![Architecture](https://user-images.githubusercontent.com/59794336/200385813-26cc9733-754e-4d50-86de-3d06695ef735.png)
+![Architecture](https://user-images.githubusercontent.com/59794336/200386057-46710067-cad7-469d-820a-d874783248f2.png)
+![Architecture](https://user-images.githubusercontent.com/59794336/200386139-8fae1aba-ed95-4c99-8a45-6578bdf537e8.png)
+
 <br/>
 
 ## Setup
@@ -126,6 +130,9 @@ Keys containing '.' must be surrounded by []
 > $.metadata.annotations.artemis.site
 
 ---
+
+
+![Architecture](https://user-images.githubusercontent.com/59794336/200386101-80d0f9f4-6755-4fe1-8a98-e3e8cade2489.png)
 
 <br/>
 
